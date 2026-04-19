@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const config = require('../config');
+const logger = require('./logger');
 
 const clientOptions = {
   dbName: 'blog-db',
@@ -12,9 +13,9 @@ const connectToDatabase = async () => {
   }
   try {
     await mongoose.connect(config.MONGO_URI, clientOptions);
-    console.log("Connected to database");
+    logger.info("Connected to database");
   } catch (err) {
-    console.error("Error connecting to database", err);
+    logger.error("Error connecting to database", err);
     throw err;
   }
 };
@@ -22,9 +23,9 @@ const connectToDatabase = async () => {
 const disconnectFromDatabase = async () => {
   try {
     await mongoose.disconnect();
-    console.log("Disconnected from database");
+    logger.info("Disconnected from database");
   } catch (err) {
-    console.error("Error disconnecting from database", err);
+    logger.error("Error disconnecting from database", err);
   }
 };
 
