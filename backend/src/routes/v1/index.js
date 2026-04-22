@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
+// Routes
+const authRoutes = require('./auth');
+
+
 router.get('/', (req, res) => {
   res.status(200).json({
     message: 'API is live',
@@ -9,5 +13,7 @@ router.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+router.use('/auth', authRoutes);
 
 module.exports = router;
