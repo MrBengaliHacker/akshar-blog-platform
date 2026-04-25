@@ -6,6 +6,9 @@ const config = {
   WHITELIST_ORIGINS: ['http://localhost:5173'],
   MONGO_URI: process.env.MONGO_URI,
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+  ADMIN_EMAILS: process.env.ADMIN_EMAILS
+    ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim())
+    : [],
 };
 
 module.exports = config;

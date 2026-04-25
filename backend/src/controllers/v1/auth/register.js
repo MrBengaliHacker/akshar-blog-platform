@@ -1,5 +1,7 @@
+// Custom modules
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
+const { genUsername } = require('../../../utils');
 
 // Models
 const User = require('../../../models/user');
@@ -7,11 +9,33 @@ const User = require('../../../models/user');
 const register = async (req, res) => {
   try {
     const { email, password, role } = req.body;
-    console.log(email, password, role);
-    const user = await User.create(req.body);
+    logger.info('Register request received', { email, role });
+
+    // Admin registration check
+    let finalRole = 'user';
+    if (role === 'admin') {
+      if (!config.ADMIN_EMAILS.includes(email)) {
+        return res.status(403).json({
+          code: 'AuthorizationError',
+          message: 'You are not allowed to register as admin',
+        });
+      }
+      finalRole = 'admin';
+    }
+
+    const username = genUsername();
+    const newUser = await User.create({
+      username,
+      email,
+      password,
+      role: finalRole,
+    });
     res.status(201).json({
-      message: 'User registered successfully',
-      data: user,
+      user: {
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role,
+      },
     });
   } catch (err) {
     logger.error('Error registering user:', err);
