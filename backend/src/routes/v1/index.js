@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Routes
 const authRoutes = require('./auth');
+const userRoutes = require('./user');
 
 
 router.get('/', (req, res) => {
@@ -15,5 +16,6 @@ router.get('/', (req, res) => {
 });
 
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 
 module.exports = router;
