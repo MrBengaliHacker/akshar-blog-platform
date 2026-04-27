@@ -9,7 +9,7 @@ const Token = require('../../../models/token');
 
 const refreshTokenHandler = async (req, res) => {
     try {
-      const { refreshToken } = req.cookies.refreshToken;
+      const refreshToken  = req.cookies.refreshToken;
       if (!refreshToken) {
         return res.status(401).json({
           code: 'AuthenticationError',
@@ -30,8 +30,8 @@ const refreshTokenHandler = async (req, res) => {
       const decoded = verifyRefreshToken(refreshToken);
 
       // generate a new access token
-      const newAccessToken = generateAccessToken(decoded.userId);
-      res.status(200).json({ accessToken });
+      const newAccessToken = generateAccessToken(decoded.id);
+      res.status(200).json({ accessToken: newAccessToken });
 
   } catch (err) {
     logger.error('Refresh token error', err);
