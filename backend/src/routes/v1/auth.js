@@ -5,9 +5,11 @@ const { body, cookie } = require('express-validator');
 const register = require('../../controllers/v1/auth/register');
 const login = require('../../controllers/v1/auth/login');
 const refreshTokenHandler = require('../../controllers/v1/auth/refreshToken');
+const logout = require('../../controllers/v1/auth/logout');
 
 // Middlewares
 const validationError = require('../../middlewares/validationError');
+const authenticate = require('../../middlewares/authenticate');
 
 // Models
 const User = require('../../models/user');
@@ -73,5 +75,7 @@ router.post(
     .withMessage('Invalid refresh token'),
   refreshTokenHandler
 );
+
+router.post('/logout', authenticate, logout);
 
 module.exports = router;
