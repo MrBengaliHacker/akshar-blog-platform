@@ -9,6 +9,7 @@ const validationError = require('../../middlewares/validationError');
 // Controllers
 const getCurrentUser = require('../../controllers/v1/user/getCurrentUser');
 const updateCurrentUser = require('../../controllers/v1/user/updateCurrentUser');
+const deleteCurrentUser = require('../../controllers/v1/user/deleteCurrentUser');
 
 // Models
 const User = require('../../models/user');
@@ -75,6 +76,13 @@ router.patch(
 
   validationError,
   updateCurrentUser,
+);
+
+router.delete(
+  '/current',
+  authenticate,
+  authorize(['admin', 'user']),
+  deleteCurrentUser,
 );
 
 module.exports = router;
