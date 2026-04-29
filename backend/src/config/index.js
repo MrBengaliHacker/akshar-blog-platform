@@ -13,6 +13,8 @@ const config = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
+  DEFAULT_RES_LIMIT: 20,
+  DEFAULT_RES_OFFSET: 0, 
 };
 
 module.exports = config;

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { body } = require('express-validator');
+const { body, query } = require('express-validator');
 
 // Middlewares
 const authenticate = require('../../middlewares/authenticate');
@@ -10,6 +10,7 @@ const validationError = require('../../middlewares/validationError');
 const getCurrentUser = require('../../controllers/v1/user/getCurrentUser');
 const updateCurrentUser = require('../../controllers/v1/user/updateCurrentUser');
 const deleteCurrentUser = require('../../controllers/v1/user/deleteCurrentUser');
+const getAllUsers = require('../../controllers/v1/user/getAllUsers');
 
 // Models
 const User = require('../../models/user');
@@ -83,6 +84,25 @@ router.delete(
   authenticate,
   authorize(['admin', 'user']),
   deleteCurrentUser,
+);
+
+router.get(
+  '/',
+  authenticate,
+  authorize(['admin']),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage('Limit must be an integer between 1 and 50'),
+
+  query('offset')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Offset must be a positive integer'),
+
+  validationError,
+  getAllUsers,
 );
 
 module.exports = router;
