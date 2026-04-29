@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { body, query } = require('express-validator');
+const { body, query, param } = require('express-validator');
 
 // Middlewares
 const authenticate = require('../../middlewares/authenticate');
@@ -11,6 +11,7 @@ const getCurrentUser = require('../../controllers/v1/user/getCurrentUser');
 const updateCurrentUser = require('../../controllers/v1/user/updateCurrentUser');
 const deleteCurrentUser = require('../../controllers/v1/user/deleteCurrentUser');
 const getAllUsers = require('../../controllers/v1/user/getAllUsers');
+const getUser = require('../../controllers/v1/user/getUser');
 
 // Models
 const User = require('../../models/user');
@@ -103,6 +104,18 @@ router.get(
 
   validationError,
   getAllUsers,
+);
+
+router.get(
+  '/:userId',
+  authenticate,
+  authorize(['admin']),
+  param('userId')
+    .notEmpty()
+    .isMongoId()
+    .withMessage('Invalid user ID'),
+  validationError,
+  getUser,
 );
 
 module.exports = router;
