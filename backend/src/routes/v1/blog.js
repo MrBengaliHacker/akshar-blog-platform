@@ -19,7 +19,6 @@ router.post(
   authenticate,
   authorize(['admin', 'user']),
   upload.single('banner_image'),
-  uploadBlogBanner('post'),
 
   body('title')
     .trim()
@@ -39,6 +38,7 @@ router.post(
     .withMessage('Status must be draft or published'),
 
   validationError,
+  uploadBlogBanner('post'),
   createBlog,
 );
 

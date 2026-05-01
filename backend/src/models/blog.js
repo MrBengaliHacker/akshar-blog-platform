@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { genSlug } = require('../utils');
 
 const blogSchema = new mongoose.Schema(
   {
@@ -66,5 +67,11 @@ const blogSchema = new mongoose.Schema(
     },
   }
 );
+
+blogSchema.pre('validate', function() {
+  if (this.title && !this.slug) {
+    this.slug = genSlug(this.title);
+  }
+});
 
 module.exports = mongoose.model('Blog', blogSchema);
