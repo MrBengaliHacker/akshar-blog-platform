@@ -1,9 +1,13 @@
+const { v2: cloudinary } = require('cloudinary');
+
 // Custom modules
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const User = require('../../../models/user');
 const Token = require('../../../models/token');
+const Blog = require('../../../models/blog');
 
 const deleteCurrentUser = async (req, res) => {
   const userId = req.userId;
@@ -18,6 +22,28 @@ const deleteCurrentUser = async (req, res) => {
       });
     }
 
+    // Find all user's blogs with banner publicIds
+    const blogs = await Blog.find({ author: userId })
+      .select('banner.publicId')
+      .lean()
+      .exec();
+
+    // Delete all blog banners from Cloudinary
+    const publicIds = blogs
+      .map((b) => b.banner?.publicId)
+      .filter(Boolean);
+
+    if (publicIds.length > 0) {
+      await cloudinary.api.delete_resources(publicIds);
+      logger.info('Multiple blog banners deleted from Cloudinary', {
+        publicIds,
+      });
+    }
+
+    // Delete all user's blogs
+    await Blog.deleteMany({ author: userId });
+    logger.info('Multiple blogs deleted', { userId });
+    
     // Delete user's refresh tokens from DB
     await Token.deleteMany({ userId });
 
