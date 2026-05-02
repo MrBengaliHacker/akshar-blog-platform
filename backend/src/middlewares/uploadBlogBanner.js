@@ -28,10 +28,25 @@ const uploadBlogBanner = (method) => {
     }
 
     try {
-      const data = await uploadToCloudinary(req.file.buffer);
+      // Get existing banner publicId for replacement on update
+      let existingPublicId;
+      if (method === 'put' && req.params.blogId) {
+        const Blog = require('../models/blog');
+        const blog = await Blog.findById(req.params.blogId)
+          .select('banner.publicId')
+          .exec();
+        existingPublicId = blog?.banner?.publicId?.replace('blog-api/', '');
+      }
+
+      const data = await uploadToCloudinary(
+        req.file.buffer,
+        existingPublicId,
+      );
 
       if (!data) {
-        logger.error('Error while uploading blog banner to Cloudinary');
+        logger.error('Error while uploading blog banner to Cloudinary', {
+          blogId: req.params.blogId,
+        });
         return res.status(500).json({
           code: 'ServerError',
           message: 'Internal server error',
@@ -45,7 +60,10 @@ const uploadBlogBanner = (method) => {
         height: data.height,
       };
 
-      logger.info('Blog banner uploaded to Cloudinary', { banner: newBanner });
+      logger.info('Blog banner uploaded to Cloudinary', { 
+        blogId: req.params.blogId,
+        banner: newBanner ,
+      });
 
       // Attach banner data to request body for controller
       req.body.banner = newBanner;
@@ -53,15 +71,15 @@ const uploadBlogBanner = (method) => {
       return next();
 
     } catch (err) {
-        logger.error('Error while uploading blog banner to Cloudinary', err);
+      logger.error('Error while uploading blog banner to Cloudinary', err);
 
-        const statusCode = err.http_code || 500;
+      const statusCode = err.http_code || 500;
 
-        return res.status(statusCode).json({
-          code: statusCode < 500 ? 'ValidationError' : 'ServerError',
-          message: err.message || 'Internal server error',
-        });
-      }
+      return res.status(statusCode).json({
+        code: statusCode < 500 ? 'ValidationError' : 'ServerError',
+        message: err.message || 'Internal server error',
+      });
+    }
   };
 };
 

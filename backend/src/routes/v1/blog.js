@@ -13,6 +13,7 @@ const createBlog = require('../../controllers/v1/blog/createBlog');
 const getAllBlogs = require('../../controllers/v1/blog/getAllBlogs');
 const getBlogsByUser = require('../../controllers/v1/blog/getBlogsByUser');
 const getBlogBySlug = require('../../controllers/v1/blog/getBlogBySlug');
+const updateBlog = require('../../controllers/v1/blog/updateBlog');
 
 // Multer - store file in memory buffer
 const upload = multer();
@@ -89,6 +90,30 @@ router.get(
     .withMessage('Slug is required'),
   validationError,
   getBlogBySlug,
+);
+
+router.patch(
+  '/:blogId',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('blogId')
+    .isMongoId()
+    .withMessage('Invalid blog ID'),
+  upload.single('banner_image'),
+  body('title')
+    .optional()
+    .trim()
+    .isLength({ max: 180 })
+    .withMessage('Title must be less than 180 characters'),
+  body('content')
+    .optional(),
+  body('status')
+    .optional()
+    .isIn(['draft', 'published'])
+    .withMessage('Status must be draft or published'),
+  validationError,
+  uploadBlogBanner('put'),
+  updateBlog,
 );
 
 module.exports = router;
