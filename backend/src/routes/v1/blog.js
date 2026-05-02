@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { body, query } = require('express-validator');
+const { body, query, param } = require('express-validator');
 const multer = require('multer');
 
 // Middlewares
@@ -11,6 +11,7 @@ const uploadBlogBanner = require('../../middlewares/uploadBlogBanner');
 // Controllers
 const createBlog = require('../../controllers/v1/blog/createBlog');
 const getAllBlogs = require('../../controllers/v1/blog/getAllBlogs');
+const getBlogsByUser = require('../../controllers/v1/blog/getBlogsByUser');
 
 // Multer - store file in memory buffer
 const upload = multer();
@@ -57,6 +58,24 @@ router.get(
     .withMessage('Offset must be a positive integer'),
   validationError,
   getAllBlogs,
+)
+router.get(
+  '/user/:userId',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('userId')
+    .isMongoId()
+    .withMessage('Invalid user ID'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage('Limit must be between 1 and 50'),
+  query('offset')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Offset must be a positive integer'),
+  validationError,
+  getBlogsByUser,
 )
 
 module.exports = router;
