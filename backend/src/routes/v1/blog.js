@@ -14,6 +14,7 @@ const getAllBlogs = require('../../controllers/v1/blog/getAllBlogs');
 const getBlogsByUser = require('../../controllers/v1/blog/getBlogsByUser');
 const getBlogBySlug = require('../../controllers/v1/blog/getBlogBySlug');
 const updateBlog = require('../../controllers/v1/blog/updateBlog');
+const deleteBlog = require('../../controllers/v1/blog/deleteBlog');
 
 // Multer - store file in memory buffer
 const upload = multer();
@@ -114,6 +115,17 @@ router.patch(
   validationError,
   uploadBlogBanner('put'),
   updateBlog,
+);
+
+router.delete(
+  '/:blogId',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('blogId')
+    .isMongoId()
+    .withMessage('Invalid blog ID'),
+  validationError,
+  deleteBlog,
 );
 
 module.exports = router;
