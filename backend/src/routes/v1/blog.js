@@ -12,6 +12,7 @@ const uploadBlogBanner = require('../../middlewares/uploadBlogBanner');
 const createBlog = require('../../controllers/v1/blog/createBlog');
 const getAllBlogs = require('../../controllers/v1/blog/getAllBlogs');
 const getBlogsByUser = require('../../controllers/v1/blog/getBlogsByUser');
+const getBlogBySlug = require('../../controllers/v1/blog/getBlogBySlug');
 
 // Multer - store file in memory buffer
 const upload = multer();
@@ -59,6 +60,7 @@ router.get(
   validationError,
   getAllBlogs,
 )
+
 router.get(
   '/user/:userId',
   authenticate,
@@ -77,5 +79,16 @@ router.get(
   validationError,
   getBlogsByUser,
 )
+
+router.get(
+  '/:slug',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('slug')
+    .notEmpty()
+    .withMessage('Slug is required'),
+  validationError,
+  getBlogBySlug,
+);
 
 module.exports = router;
