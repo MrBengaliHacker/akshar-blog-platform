@@ -5,6 +5,7 @@ const router = express.Router();
 const authRoutes = require('./auth');
 const userRoutes = require('./user');
 const blogRoutes = require('./blog');
+const likeRoutes = require('./like');
 
 
 router.get('/', (req, res) => {
@@ -19,5 +20,6 @@ router.get('/', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/blogs', blogRoutes);
+router.use('/likes', likeRoutes);
 
 module.exports = router;
