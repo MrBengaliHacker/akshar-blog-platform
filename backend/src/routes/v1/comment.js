@@ -8,6 +8,7 @@ const validationError = require('../../middlewares/validationError');
 
 // Controllers
 const commentBlog = require('../../controllers/v1/comment/commentBlog');
+const getCommentsByBlog = require('../../controllers/v1/comment/getCommentsByBlog');
 
 router.post(
   '/blog/:blogId',
@@ -22,6 +23,17 @@ router.post(
     .withMessage('Content is required'),
   validationError,
   commentBlog,
+);
+
+router.get(
+  '/blog/:blogId',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('blogId')
+    .isMongoId()
+    .withMessage('Invalid blog ID'),
+  validationError,
+  getCommentsByBlog,
 );
 
 module.exports = router;
