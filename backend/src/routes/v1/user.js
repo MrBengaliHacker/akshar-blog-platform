@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { body, query, param } = require('express-validator');
 const multer = require('multer');
+const upload = multer();
 
 // Middlewares
 const authenticate = require('../../middlewares/authenticate');
