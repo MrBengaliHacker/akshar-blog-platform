@@ -6,6 +6,7 @@ const authRoutes = require('./auth');
 const userRoutes = require('./user');
 const blogRoutes = require('./blog');
 const likeRoutes = require('./like');
+const commentRoutes = require('./comment');
 
 
 router.get('/', (req, res) => {
@@ -21,5 +22,6 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/blogs', blogRoutes);
 router.use('/likes', likeRoutes);
+router.use('/comments', commentRoutes);
 
 module.exports = router;
