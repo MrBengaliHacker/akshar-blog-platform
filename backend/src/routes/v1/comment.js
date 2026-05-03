@@ -9,6 +9,7 @@ const validationError = require('../../middlewares/validationError');
 // Controllers
 const commentBlog = require('../../controllers/v1/comment/commentBlog');
 const getCommentsByBlog = require('../../controllers/v1/comment/getCommentsByBlog');
+const deleteComment = require('../../controllers/v1/comment/deleteComment');
 
 router.post(
   '/blog/:blogId',
@@ -35,5 +36,17 @@ router.get(
   validationError,
   getCommentsByBlog,
 );
+
+router.delete(
+  '/:commentId',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('commentId')
+    .isMongoId()
+    .withMessage('Invalid comment ID'),
+  validationError,
+  deleteComment,
+);
+
 
 module.exports = router;
