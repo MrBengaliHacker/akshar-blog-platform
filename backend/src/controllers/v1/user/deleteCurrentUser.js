@@ -22,6 +22,12 @@ const deleteCurrentUser = async (req, res) => {
       });
     }
 
+    // Delete avatar from Cloudinary if exists
+    if (user.avatar) {
+      await cloudinary.uploader.destroy(`avatars/${userId}`);
+      logger.info('Avatar deleted from Cloudinary', { userId });
+    }
+
     // Find all user's blogs with banner publicIds
     const blogs = await Blog.find({ author: userId })
       .select('banner.publicId')

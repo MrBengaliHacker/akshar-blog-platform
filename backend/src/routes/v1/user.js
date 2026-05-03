@@ -1,10 +1,12 @@
 const router = require('express').Router();
 const { body, query, param } = require('express-validator');
+const multer = require('multer');
 
 // Middlewares
 const authenticate = require('../../middlewares/authenticate');
 const authorize = require('../../middlewares/authorize');
 const validationError = require('../../middlewares/validationError');
+const uploadAvatar = require('../../middlewares/uploadAvatar');
 
 // Controllers
 const getCurrentUser = require('../../controllers/v1/user/getCurrentUser');
@@ -30,6 +32,8 @@ router.patch(
   '/current',
   authenticate,
   authorize(['admin', 'user']),
+  upload.single('avatar_image'), // ← multer reads file
+  uploadAvatar,                  // ← uploads to Cloudinary
 
   body('username')
     .optional()
@@ -70,6 +74,12 @@ router.patch(
     .trim()
     .isLength({ max: 20 })
     .withMessage('Last name must be less than 20 characters'),
+  
+  body('bio')
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('Bio must be less than 200 characters'),
 
   body(['website', 'facebook', 'instagram', 'linkedin', 'x', 'youtube'])
     .optional()
