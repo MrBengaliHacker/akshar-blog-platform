@@ -12,7 +12,9 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: [true, 'Email is required'],
     maxlength: [50, 'Email must be less than 50 characters'],
-    unique: [true, 'Email must be unique'] 
+    unique: [true, 'Email must be unique'] ,
+    lowercase: true,
+    trim: true,
   },
   password: { 
     type: String, 
@@ -27,6 +29,18 @@ const userSchema = new mongoose.Schema({
       message: '{VALUE} is not supported',
     },
     default: 'user',
+  },
+  avatar: {
+    type: String,
+    default: '',
+  },
+  bio: {
+    type: String,
+    maxlength: [200, 'Bio must be less than 200 characters'],
+  },
+  isBanned: {
+    type: Boolean,
+    default: false,
   },
   firstName: { 
     type: String, 

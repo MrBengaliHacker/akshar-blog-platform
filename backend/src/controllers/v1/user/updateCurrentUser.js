@@ -12,6 +12,8 @@ const updateCurrentUser = async (req, res) => {
     password,
     firstName,
     lastName,
+    avatar,
+    bio,
     website,
     facebook,
     instagram,
@@ -37,6 +39,8 @@ const updateCurrentUser = async (req, res) => {
     if (password) user.password = password;
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
+    if (avatar) user.avatar = avatar;
+    if (bio) user.bio = bio;
 
     if (!user.socialLinks) user.socialLinks = {};
     if (website) user.socialLinks.website = website;
@@ -55,9 +59,12 @@ const updateCurrentUser = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        avatar: user.avatar,
+        bio: user.bio,
         firstName: user.firstName,
         lastName: user.lastName,
         socialLinks: user.socialLinks,
+        isBanned: user.isBanned,
         createdAt: user.createdAt,
       },
     });

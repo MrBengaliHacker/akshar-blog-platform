@@ -13,6 +13,7 @@ const deleteCurrentUser = require('../../controllers/v1/user/deleteCurrentUser')
 const getAllUsers = require('../../controllers/v1/user/getAllUsers');
 const getUser = require('../../controllers/v1/user/getUser');
 const deleteUser = require('../../controllers/v1/user/deleteUser');
+const banUser = require('../../controllers/v1/user/banUser');
 
 // Models
 const User = require('../../models/user');
@@ -129,6 +130,17 @@ router.delete(
     .withMessage('Invalid user ID'),
   validationError,
   deleteUser,
+);
+
+router.patch(
+  '/:userId/ban',
+  authenticate,
+  authorize(['admin']),
+  param('userId')
+    .isMongoId()
+    .withMessage('Invalid user ID'),
+  validationError,
+  banUser,
 );
 
 module.exports = router;

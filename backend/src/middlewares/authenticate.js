@@ -4,7 +4,10 @@ const { JsonWebTokenError, TokenExpiredError } = require('jsonwebtoken');
 const { verifyAccessToken } = require('../lib/jwt');
 const logger = require('../lib/logger');
 
-const authenticate = (req, res, next) => {
+// Models
+const User = require('../models/user');
+
+const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   // Check if the Authorization header is present and starts with 'Bearer '
@@ -21,6 +24,16 @@ const authenticate = (req, res, next) => {
   try {
     // Verify the token and extract the user ID
     const decoded = verifyAccessToken(token);
+
+    // Check if user is banned
+    const user = await User.findById(decoded.id).select('isBanned');
+    if (user?.isBanned) {
+      return res.status(403).json({
+        code: 'AuthorizationError',
+        message: 'Your account has been banned',
+      });
+    }
+
     req.userId = decoded.id;
     return next();
     
