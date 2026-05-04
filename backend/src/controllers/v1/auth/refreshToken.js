@@ -3,6 +3,7 @@ const { JsonWebTokenError, TokenExpiredError } = require('jsonwebtoken');
 // custom modules
 const { generateAccessToken, verifyRefreshToken  } = require('../../../lib/jwt');
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const Token = require('../../../models/token');
@@ -49,7 +50,9 @@ const refreshTokenHandler = async (req, res) => {
     }
 
     return res.status(500).json({
-      message: 'Server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

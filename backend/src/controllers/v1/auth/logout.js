@@ -32,7 +32,9 @@ const logout = async (req, res) => {
     logger.error('Error during logout', err);
     res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

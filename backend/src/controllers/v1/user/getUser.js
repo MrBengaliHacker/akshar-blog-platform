@@ -1,5 +1,6 @@
 // Custom modules
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const User = require('../../../models/user');
@@ -16,7 +17,9 @@ const getUser = async (req, res) => {
      if (!user) {
       return res.status(404).json({
         code: 'NotFound',
-        message: 'User not found',
+        message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
       });
     }
 
@@ -29,7 +32,9 @@ const getUser = async (req, res) => {
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+       message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

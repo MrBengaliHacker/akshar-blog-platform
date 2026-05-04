@@ -29,7 +29,7 @@ const getAllBlogs = async (req, res) => {
 
     const blogs = await Blog.find(query)
       .select('-banner.publicId -__v')
-      .populate('author', '-createdAt -updatedAt -__v')
+      .populate('author', '-password -createdAt -updatedAt -__v')
       .limit(limit)
       .skip(offset)
       .sort({ publishedAt: -1 })
@@ -49,7 +49,9 @@ const getAllBlogs = async (req, res) => {
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 }

@@ -14,7 +14,7 @@ const login = async (req, res) => {
       const { email, password } = req.body;
 
       // find user
-      const user = await User.findOne({ email }).select('+password');
+      const user = await User.findOne({ email }).select('+password').exec();
       if (!user) {
         return res.status(401).json({
           code: 'AuthenticationError',
@@ -47,6 +47,7 @@ const login = async (req, res) => {
         httpOnly: true,
         secure: config.NODE_ENV === 'production',
         sameSite: config.NODE_ENV === 'production' ? 'strict' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
   
       res.status(200).json({
@@ -65,7 +66,9 @@ const login = async (req, res) => {
       logger.error('Error logging in user:', err);
       res.status(500).json({
         code: 'ServerError',
-        message: 'Internal server error',
+        message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
       });
     }
   };

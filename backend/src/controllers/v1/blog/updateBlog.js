@@ -3,6 +3,7 @@ const DOMPurify = require('dompurify');
 
 // Custom modules
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const Blog = require('../../../models/blog');
@@ -52,16 +53,22 @@ const updateBlog = async (req, res) => {
 
     await blog.save();
 
+    const blogObject = blog.toObject();
+    delete blogObject.__v;
+    delete blogObject.banner?.publicId;
+
     logger.info('Blog updated successfully', { blogId, userId });
 
-    return res.status(200).json({ blog });
+    return res.status(200).json({ blog: blogObject });
 
   } catch (err) {
     logger.error('Error while updating blog', err);
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

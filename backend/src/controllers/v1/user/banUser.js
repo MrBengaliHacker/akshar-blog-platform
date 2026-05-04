@@ -1,5 +1,6 @@
 // Custom modules
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const User = require('../../../models/user');
@@ -38,7 +39,9 @@ const banUser = async (req, res) => {
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+       message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

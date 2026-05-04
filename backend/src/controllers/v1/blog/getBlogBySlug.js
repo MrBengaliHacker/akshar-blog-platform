@@ -1,5 +1,6 @@
 // Custom modules
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const Blog = require('../../../models/blog');
@@ -18,7 +19,7 @@ const getBlogBySlug = async (req, res) => {
 
     const blog = await Blog.findOne({ slug })
       .select('-banner.publicId -__v')
-      .populate('author', '-createdAt -updatedAt -__v')
+      .populate('author', '-password -createdAt -updatedAt -__v')
       .lean()
       .exec();
 
@@ -47,7 +48,9 @@ const getBlogBySlug = async (req, res) => {
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

@@ -2,6 +2,7 @@ const { v2: cloudinary } = require('cloudinary');
 
 // Custom modules
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const Blog = require('../../../models/blog');
@@ -58,7 +59,9 @@ const deleteBlog = async (req, res) => {
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

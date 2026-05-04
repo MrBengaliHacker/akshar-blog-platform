@@ -1,4 +1,5 @@
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 const model = require('../../../lib/gemini');
 
 const ACTIONS = {
@@ -59,7 +60,9 @@ const aiAssist = async (req, res) => {
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };

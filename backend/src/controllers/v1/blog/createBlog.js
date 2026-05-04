@@ -3,6 +3,7 @@ const DOMPurify = require('dompurify');
 
 // Custom modules
 const logger = require('../../../lib/logger');
+const config = require('../../../config');
 
 // Models
 const Blog = require('../../../models/blog');
@@ -27,10 +28,13 @@ const createBlog = async (req, res) => {
       author: userId,
     });
 
+    const blogObject = newBlog.toObject();
+    delete blogObject.__v;
+
     logger.info('New blog created', { blogId: newBlog._id, userId });
 
     return res.status(201).json({
-      blog: newBlog,
+      blog: blogObject,
     });
 
   } catch (err) {
@@ -38,7 +42,9 @@ const createBlog = async (req, res) => {
 
     return res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
   }
 };
