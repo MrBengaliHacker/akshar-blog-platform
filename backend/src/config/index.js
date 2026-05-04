@@ -9,6 +9,7 @@ const config = {
   ADMIN_EMAILS: process.env.ADMIN_EMAILS
     ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim())
     : [],
+  DEMO_ADMIN_EMAIL: process.env.DEMO_ADMIN_EMAIL,
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY,
@@ -20,5 +21,10 @@ const config = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 };
+
+const required = ['MONGO_URI', 'JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];
+required.forEach(key => {
+  if (!config[key]) throw new Error(`Missing required env variable: ${key}`);
+});
 
 module.exports = config;

@@ -8,6 +8,7 @@ const authenticate = require('../../middlewares/authenticate');
 const authorize = require('../../middlewares/authorize');
 const validationError = require('../../middlewares/validationError');
 const uploadAvatar = require('../../middlewares/uploadAvatar');
+const demoGuard = require('../../middlewares/demoGuard');
 
 // Controllers
 const getCurrentUser = require('../../controllers/v1/user/getCurrentUser');
@@ -135,6 +136,7 @@ router.delete(
   '/:userId',
   authenticate,
   authorize(['admin']),
+  demoGuard,
   param('userId')
     .notEmpty()
     .isMongoId()
@@ -147,6 +149,7 @@ router.patch(
   '/:userId/ban',
   authenticate,
   authorize(['admin']),
+  demoGuard,
   param('userId')
     .isMongoId()
     .withMessage('Invalid user ID'),

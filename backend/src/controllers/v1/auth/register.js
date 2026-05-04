@@ -16,7 +16,11 @@ const register = async (req, res) => {
     // Admin registration check
     let finalRole = 'user';
     if (role === 'admin') {
-      if (!config.ADMIN_EMAILS.includes(email)) {
+      // Allow real admins and demo admin to register
+      const isAdminEmail = config.ADMIN_EMAILS.includes(email);
+      const isDemoAdmin = email === config.DEMO_ADMIN_EMAIL;
+
+      if (!isAdminEmail && !isDemoAdmin) {
         return res.status(403).json({
           code: 'AuthorizationError',
           message: 'You are not allowed to register as admin',
@@ -50,6 +54,7 @@ const register = async (req, res) => {
       httpOnly: true,
       secure: config.NODE_ENV === 'production',
       sameSite: 'Strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
@@ -66,13 +71,22 @@ const register = async (req, res) => {
       role: newUser.role,
     });
   } catch (err) {
-    logger.error('Error registering user:', err);
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyValue)[0];
+      return res.status(409).json({
+        code: 'ConflictError',
+        message: `${field} already exists`,
+      });
+    }
+
+    logger.error('Error during user registration:', err);
+
     res.status(500).json({
       code: 'ServerError',
-      message: 'Internal server error',
-      error: err.message,
+      message: config.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     });
-    logger.error('Error during user registration:', err);
   }
 };
 

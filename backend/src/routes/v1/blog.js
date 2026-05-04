@@ -7,6 +7,7 @@ const authenticate = require('../../middlewares/authenticate');
 const authorize = require('../../middlewares/authorize');
 const validationError = require('../../middlewares/validationError');
 const uploadBlogBanner = require('../../middlewares/uploadBlogBanner');
+const demoGuard = require('../../middlewares/demoGuard');
 
 // Controllers
 const createBlog = require('../../controllers/v1/blog/createBlog');
@@ -121,6 +122,7 @@ router.delete(
   '/:blogId',
   authenticate,
   authorize(['admin', 'user']),
+  demoGuard,
   param('blogId')
     .isMongoId()
     .withMessage('Invalid blog ID'),
