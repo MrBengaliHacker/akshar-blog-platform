@@ -1,5 +1,6 @@
-const logger = require('../../../lib/logger');
-const Blog = require('../../../models/blog');
+// Custom modules
+const logger = require('../lib/logger');
+const Blog = require('../models/blog');
 
 const VIEW_COOKIE_TTL = 24 * 60 * 60 * 1000;
 

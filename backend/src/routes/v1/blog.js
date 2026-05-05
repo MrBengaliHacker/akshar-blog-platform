@@ -16,6 +16,7 @@ const getBlogsByUser = require('../../controllers/v1/blog/getBlogsByUser');
 const getBlogBySlug = require('../../controllers/v1/blog/getBlogBySlug');
 const updateBlog = require('../../controllers/v1/blog/updateBlog');
 const deleteBlog = require('../../controllers/v1/blog/deleteBlog');
+const incrementViewCount = require('../../middlewares/incrementViewCount');
 
 // Multer - store file in memory buffer
 const upload = multer();
@@ -91,6 +92,7 @@ router.get(
     .notEmpty()
     .withMessage('Slug is required'),
   validationError,
+  incrementViewCount,
   getBlogBySlug,
 );
 

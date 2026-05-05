@@ -1,7 +1,6 @@
 // Custom modules
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
-const incrementViewCount = require('./incrementViewCount');
 
 // Models
 const Blog = require('../../../models/blog');
@@ -39,8 +38,6 @@ const getBlogBySlug = async (req, res) => {
         message: 'Access denied, insufficient permissions',
       });
     }
-
-    await incrementViewCount(req, res, () => {});
 
     logger.info('Blog fetched by slug', { slug, blogId: blog._id });
 
