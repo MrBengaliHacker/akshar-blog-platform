@@ -3,12 +3,14 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const helmet = require('helmet');
+const swaggerUi = require('swagger-ui-express');
 
 // Custom modules
 const config = require('./config');
 const limiter = require('./lib/rateLimit');
 const { connectToDatabase, disconnectFromDatabase} = require('./lib/mongoose');
 const logger = require('./lib/logger');
+const swaggerSpec = require('./lib/swagger');
 
 const v1Routes = require('./routes/v1');
 
@@ -49,10 +51,21 @@ const startServer = async () => {
   try {
     await connectToDatabase();
 
+    // API routes
     app.use('/api/v1', v1Routes);
+
+    app.use(
+      '/api/v1/docs',
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec, {
+        customSiteTitle: 'Akshar Blog API Docs',
+        customCss: '.swagger-ui .topbar { display: none }',
+      })
+    );
 
     app.listen(config.PORT, () => {
       logger.info(`Server is running on http://localhost:${config.PORT}`);
+      logger.info(`API docs available at http://localhost:${config.PORT}/api/v1/docs`);
     });
   } catch (err) {
     logger.error("Failed to start server", err);
