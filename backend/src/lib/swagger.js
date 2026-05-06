@@ -4,13 +4,30 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Akshar Blog Platform API',
+      title: 'Akshar Blog API',
       version: '1.0.0',
-      description: 'A full-stack blog platform API with AI writing assistance, role-based access control, and complete admin panel.',
-      contact: {
-        name: 'MrBengaliHacker',
-        url: 'https://github.com/MrBengaliHacker',
-      },
+      description: `
+## Akshar Blog REST API
+
+A modern blog REST API with AI writing assistance, role-based access control, and complete admin panel.
+
+## Authentication
+This API uses JWT Bearer token authentication.
+1. Register or login to get an access token
+2. Click **Authorize** button and enter: \`your_access_token\`
+3. All protected endpoints will use this token automatically
+
+## Demo Access
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | demo@akshar.com | Demo@1234 |
+
+> ⚠️ Destructive actions (delete, ban) are disabled in demo mode.
+
+## Roles
+- **user** → Can create, edit own blogs, comment, like
+- **admin** → Full access including user management
+      `,
     },
     servers: [
       {
@@ -24,7 +41,7 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Enter your access token',
+          description: 'Enter your access token here',
         },
       },
       schemas: {
@@ -114,12 +131,14 @@ const options = {
       { name: 'AI', description: 'AI writing assistant endpoints' },
     ],
     paths: {
-      // ─── AUTH ───────────────────────────────────────────
+
+      // ─── AUTH ─────────────────────────────────────────
       '/auth/register': {
         post: {
           tags: ['Auth'],
           summary: 'Register a new user',
           security: [],
+          description: 'Register a new user account. To register as **admin**, your email must be whitelisted in `ADMIN_EMAILS` or be the `DEMO_ADMIN_EMAIL`.',
           requestBody: {
             required: true,
             content: {
@@ -129,8 +148,13 @@ const options = {
                   required: ['email', 'password'],
                   properties: {
                     email: { type: 'string', example: 'john@gmail.com' },
-                    password: { type: 'string', example: 'password123' },
-                    role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+                    password: { type: 'string', example: 'password123', minLength: 8 },
+                    role: {
+                      type: 'string',
+                      enum: ['user', 'admin'],
+                      example: 'user',
+                      description: 'Admin role requires whitelisted email',
+                    },
                   },
                 },
               },
@@ -152,15 +176,18 @@ const options = {
               },
             },
             400: { description: 'Validation error' },
+            403: { description: 'Not authorized to register as admin' },
             409: { description: 'Email already exists' },
           },
         },
       },
+
       '/auth/login': {
         post: {
           tags: ['Auth'],
           summary: 'Login user',
           security: [],
+          description: 'Login with email and password. Returns access token and sets refresh token in httpOnly cookie.',
           requestBody: {
             required: true,
             content: {
@@ -191,16 +218,17 @@ const options = {
                 },
               },
             },
-            401: { description: 'Invalid credentials' },
+            401: { description: 'Invalid email or password' },
           },
         },
       },
+
       '/auth/refresh-token': {
         post: {
           tags: ['Auth'],
           summary: 'Refresh access token',
           security: [],
-          description: 'Uses refresh token from httpOnly cookie',
+          description: 'Get a new access token using the refresh token stored in httpOnly cookie. Call this when access token expires.',
           responses: {
             200: {
               description: 'New access token generated',
@@ -215,14 +243,16 @@ const options = {
                 },
               },
             },
-            401: { description: 'Refresh token missing or invalid' },
+            401: { description: 'Refresh token missing or invalid or expired' },
           },
         },
       },
+
       '/auth/logout': {
         post: {
           tags: ['Auth'],
           summary: 'Logout user',
+          description: 'Deletes refresh token from DB and clears httpOnly cookie.',
           responses: {
             204: { description: 'Logged out successfully' },
             500: { description: 'Server error' },
@@ -230,11 +260,12 @@ const options = {
         },
       },
 
-      // ─── USERS ──────────────────────────────────────────
+      // ─── USERS ────────────────────────────────────────
       '/users/current': {
         get: {
           tags: ['Users'],
           summary: 'Get current user',
+          description: 'Returns the currently authenticated user profile.',
           responses: {
             200: {
               description: 'Current user data',
@@ -248,24 +279,26 @@ const options = {
               },
             },
             401: { description: 'Unauthorized' },
+            404: { description: 'User not found' },
           },
         },
         patch: {
           tags: ['Users'],
           summary: 'Update current user',
+          description: 'Update profile fields. All fields are optional. Upload avatar_image as file.',
           requestBody: {
             content: {
               'multipart/form-data': {
                 schema: {
                   type: 'object',
                   properties: {
-                    avatar_image: { type: 'string', format: 'binary' },
-                    username: { type: 'string' },
+                    avatar_image: { type: 'string', format: 'binary', description: 'Max 1MB' },
+                    username: { type: 'string', maxLength: 20 },
                     email: { type: 'string' },
-                    password: { type: 'string' },
-                    firstName: { type: 'string' },
-                    lastName: { type: 'string' },
-                    bio: { type: 'string' },
+                    password: { type: 'string', minLength: 8 },
+                    firstName: { type: 'string', maxLength: 20 },
+                    lastName: { type: 'string', maxLength: 20 },
+                    bio: { type: 'string', maxLength: 200 },
                     website: { type: 'string' },
                     facebook: { type: 'string' },
                     instagram: { type: 'string' },
@@ -286,19 +319,22 @@ const options = {
         delete: {
           tags: ['Users'],
           summary: 'Delete own account',
+          description: 'Permanently deletes account, all blogs, banners from Cloudinary and refresh tokens.',
           responses: {
             204: { description: 'Account deleted successfully' },
             401: { description: 'Unauthorized' },
           },
         },
       },
+
       '/users': {
         get: {
           tags: ['Users'],
-          summary: 'Get all users (Admin only)',
+          summary: 'Get all users',
+          description: '**Admin only.** Returns paginated list of all users.',
           parameters: [
-            { name: 'limit', in: 'query', schema: { type: 'integer', default: 20 } },
-            { name: 'offset', in: 'query', schema: { type: 'integer', default: 0 } },
+            { name: 'limit', in: 'query', description: 'Max 50', schema: { type: 'integer', default: 20 } },
+            { name: 'offset', in: 'query', description: 'Skip count', schema: { type: 'integer', default: 0 } },
           ],
           responses: {
             200: {
@@ -324,10 +360,12 @@ const options = {
           },
         },
       },
+
       '/users/{userId}': {
         get: {
           tags: ['Users'],
-          summary: 'Get user by ID (Admin only)',
+          summary: 'Get user by ID',
+          description: '**Admin only.**',
           parameters: [
             { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -338,20 +376,24 @@ const options = {
         },
         delete: {
           tags: ['Users'],
-          summary: 'Delete user by ID (Admin only)',
+          summary: 'Delete user by ID',
+          description: '**Admin only.** Permanently deletes user and all their data.',
           parameters: [
             { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
           ],
           responses: {
             204: { description: 'User deleted' },
+            403: { description: 'Demo mode restriction or insufficient permissions' },
             404: { description: 'User not found' },
           },
         },
       },
+
       '/users/{userId}/ban': {
         patch: {
           tags: ['Users'],
-          summary: 'Ban or unban user (Admin only)',
+          summary: 'Ban or unban user',
+          description: '**Admin only.** Toggles ban status. Banned users cannot access protected endpoints.',
           parameters: [
             { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -363,23 +405,25 @@ const options = {
                   schema: {
                     type: 'object',
                     properties: {
-                      message: { type: 'string' },
+                      message: { type: 'string', example: 'User banned successfully' },
                       isBanned: { type: 'boolean' },
                     },
                   },
                 },
               },
             },
+            403: { description: 'Demo mode restriction or insufficient permissions' },
             404: { description: 'User not found' },
           },
         },
       },
 
-      // ─── BLOGS ──────────────────────────────────────────
+      // ─── BLOGS ────────────────────────────────────────
       '/blogs': {
         post: {
           tags: ['Blogs'],
           summary: 'Create a new blog',
+          description: 'Create a blog post with banner image. Content should be HTML from Tiptap editor. Slug is auto-generated.',
           requestBody: {
             required: true,
             content: {
@@ -388,10 +432,10 @@ const options = {
                   type: 'object',
                   required: ['banner_image', 'title', 'content'],
                   properties: {
-                    banner_image: { type: 'string', format: 'binary' },
-                    title: { type: 'string', example: 'My First Blog' },
-                    content: { type: 'string', example: '<p>Hello world</p>' },
-                    status: { type: 'string', enum: ['draft', 'published'], example: 'draft' },
+                    banner_image: { type: 'string', format: 'binary', description: 'Max 2MB, jpg/png/webp' },
+                    title: { type: 'string', example: 'My First Blog', maxLength: 180 },
+                    content: { type: 'string', example: '<p>Hello world</p>', description: 'HTML content from Tiptap' },
+                    status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
                   },
                 },
               },
@@ -399,12 +443,13 @@ const options = {
           },
           responses: {
             201: { description: 'Blog created successfully' },
-            400: { description: 'Validation error' },
+            400: { description: 'Validation error or missing banner' },
           },
         },
         get: {
           tags: ['Blogs'],
-          summary: 'Get all blogs with pagination',
+          summary: 'Get all blogs',
+          description: 'Admin sees all blogs (draft + published). Regular users see published only.',
           parameters: [
             { name: 'limit', in: 'query', schema: { type: 'integer', default: 20 } },
             { name: 'offset', in: 'query', schema: { type: 'integer', default: 0 } },
@@ -432,10 +477,12 @@ const options = {
           },
         },
       },
+
       '/blogs/user/{userId}': {
         get: {
           tags: ['Blogs'],
           summary: 'Get blogs by user',
+          description: 'Admin sees all statuses. Regular users see published only.',
           parameters: [
             { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
             { name: 'limit', in: 'query', schema: { type: 'integer', default: 20 } },
@@ -447,23 +494,38 @@ const options = {
           },
         },
       },
+
       '/blogs/{slug}': {
         get: {
           tags: ['Blogs'],
           summary: 'Get blog by slug',
+          description: 'Increments view count once per user per day using cookie tracking.',
           parameters: [
             { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
           ],
           responses: {
-            200: { description: 'Blog data' },
+            200: {
+              description: 'Blog data',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: { blog: { $ref: '#/components/schemas/Blog' } },
+                  },
+                },
+              },
+            },
+            403: { description: 'Draft blog — admin access only' },
             404: { description: 'Blog not found' },
           },
         },
       },
+
       '/blogs/{blogId}': {
         patch: {
           tags: ['Blogs'],
-          summary: 'Update blog (owner or admin)',
+          summary: 'Update blog',
+          description: 'Only blog owner or admin can update. All fields optional.',
           parameters: [
             { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -473,7 +535,7 @@ const options = {
                 schema: {
                   type: 'object',
                   properties: {
-                    banner_image: { type: 'string', format: 'binary' },
+                    banner_image: { type: 'string', format: 'binary', description: 'Max 2MB' },
                     title: { type: 'string' },
                     content: { type: 'string' },
                     status: { type: 'string', enum: ['draft', 'published'] },
@@ -490,23 +552,25 @@ const options = {
         },
         delete: {
           tags: ['Blogs'],
-          summary: 'Delete blog (owner or admin)',
+          summary: 'Delete blog',
+          description: 'Only blog owner or admin can delete. Also removes banner from Cloudinary.',
           parameters: [
             { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
           ],
           responses: {
             204: { description: 'Blog deleted successfully' },
-            403: { description: 'Not authorized' },
+            403: { description: 'Not authorized or demo mode restriction' },
             404: { description: 'Blog not found' },
           },
         },
       },
 
-      // ─── LIKES ──────────────────────────────────────────
+      // ─── LIKES ────────────────────────────────────────
       '/likes/blog/{blogId}': {
         post: {
           tags: ['Likes'],
           summary: 'Like a blog',
+          description: 'Like a blog post. Each user can only like once.',
           parameters: [
             { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -522,13 +586,14 @@ const options = {
                 },
               },
             },
-            400: { description: 'Already liked' },
+            400: { description: 'Already liked this blog' },
             404: { description: 'Blog not found' },
           },
         },
         delete: {
           tags: ['Likes'],
           summary: 'Unlike a blog',
+          description: 'Remove your like from a blog post.',
           parameters: [
             { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -539,11 +604,12 @@ const options = {
         },
       },
 
-      // ─── COMMENTS ───────────────────────────────────────
+      // ─── COMMENTS ─────────────────────────────────────
       '/comments/blog/{blogId}': {
         post: {
           tags: ['Comments'],
           summary: 'Add comment to blog',
+          description: 'Add a comment to a blog post. Content is sanitized with DOMPurify.',
           parameters: [
             { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -555,7 +621,7 @@ const options = {
                   type: 'object',
                   required: ['content'],
                   properties: {
-                    content: { type: 'string', example: 'Great blog post!' },
+                    content: { type: 'string', example: 'Great blog post!', maxLength: 1000 },
                   },
                 },
               },
@@ -569,6 +635,7 @@ const options = {
         get: {
           tags: ['Comments'],
           summary: 'Get comments by blog',
+          description: 'Returns all comments for a blog post sorted by newest first.',
           parameters: [
             { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -593,10 +660,12 @@ const options = {
           },
         },
       },
+
       '/comments/{commentId}': {
         delete: {
           tags: ['Comments'],
-          summary: 'Delete comment (owner or admin)',
+          summary: 'Delete comment',
+          description: 'Only comment owner or admin can delete.',
           parameters: [
             { name: 'commentId', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -608,12 +677,23 @@ const options = {
         },
       },
 
-      // ─── AI ─────────────────────────────────────────────
+      // ─── AI ───────────────────────────────────────────
       '/ai/assist': {
         post: {
           tags: ['AI'],
           summary: 'AI writing assistant',
-          description: 'Use Gemini AI to assist with blog writing',
+          description: `Use Google Gemini AI to assist with blog writing.
+
+**Available actions:**
+- \`improve\` → Fix grammar and improve writing quality
+- \`continue\` → Continue writing naturally
+- \`summarize\` → Summarize in 2-3 sentences
+- \`title\` → Generate 5 SEO-friendly title suggestions
+- \`expand\` → Expand with more details
+- \`tone_formal\` → Rewrite in formal tone
+- \`tone_casual\` → Rewrite in casual tone
+- \`fullBlog\` → Write complete blog from topic
+- \`freePrompt\` → Free form AI writing prompt`,
           requestBody: {
             required: true,
             content: {
@@ -625,6 +705,7 @@ const options = {
                     prompt: {
                       type: 'string',
                       example: 'The future of AI in healthcare',
+                      maxLength: 10000,
                     },
                     action: {
                       type: 'string',
