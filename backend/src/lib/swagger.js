@@ -34,6 +34,10 @@ This API uses JWT Bearer token authentication.
         url: 'http://localhost:3000/api/v1',
         description: 'Development server',
       },
+      {
+        url: 'https://akshar-blog-platform.onrender.com/api/v1',
+        description: 'Production server',
+      },
     ],
     components: {
       securitySchemes: {
