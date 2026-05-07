@@ -43,6 +43,7 @@ const corsOptions = {
       callback(null, false);
     }
   },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -54,18 +55,33 @@ const startServer = async () => {
     // API routes
     app.use('/api/v1', v1Routes);
 
+    // Swagger docs
     app.use(
       '/api/v1/docs',
       swaggerUi.serve,
       swaggerUi.setup(swaggerSpec, {
         customSiteTitle: 'Akshar Blog API Docs',
         customCss: '.swagger-ui .topbar { display: none }',
+        swaggerOptions: {
+          withCredentials: true,
+        },
       })
     );
 
+    // Handle undefined routes
+    app.use((req, res) => {
+      res.status(404).json({
+        code: 'NotFound',
+        message: `Route ${req.method} ${req.url} not found`,
+        api: '/api/v1',
+        docs: '/api/v1/docs',
+      });
+    });
+
     app.listen(config.PORT, () => {
       logger.info(`Server is running on http://localhost:${config.PORT}`);
-      logger.info(`API docs available at http://localhost:${config.PORT}/api/v1/docs`);
+      logger.info(`API base URL: http://localhost:${config.PORT}/api/v1`);
+      logger.info(`API docs: http://localhost:${config.PORT}/api/v1/docs`);
     });
   } catch (err) {
     logger.error("Failed to start server", err);
