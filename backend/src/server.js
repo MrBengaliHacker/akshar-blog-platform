@@ -43,7 +43,6 @@ const corsOptions = {
       callback(null, false);
     }
   },
-  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -62,9 +61,6 @@ const startServer = async () => {
       swaggerUi.setup(swaggerSpec, {
         customSiteTitle: 'Akshar Blog API Docs',
         customCss: '.swagger-ui .topbar { display: none }',
-        swaggerOptions: {
-          withCredentials: true,
-        },
       })
     );
 
