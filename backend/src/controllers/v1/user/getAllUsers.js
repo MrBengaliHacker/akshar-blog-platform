@@ -12,13 +12,35 @@ const getAllUsers = async (req, res) => {
 
     const total = await User.countDocuments();
 
-    const users = await User.find()
+    let users = await User.find()
       .select('-password -__v')
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(offset)
       .lean()
       .exec();
+    
+    // Hide real admin emails from demo admin
+    if (
+      req.user?.email?.toLowerCase() ===
+      config.DEMO_ADMIN_EMAIL
+    ) {
+      users = users.map(user => {
+
+        // Hide real admin email
+        if (
+          user.role === 'admin' &&
+          user.email !== config.DEMO_ADMIN_EMAIL
+        ) {
+          return {
+            ...user,
+            email: 'hidden',
+          };
+        }
+
+        return user;
+      });
+    }
 
     logger.info('Fetched all users', { total, limit, offset });
 
