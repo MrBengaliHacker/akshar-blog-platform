@@ -19,9 +19,6 @@ const getAllUsers = async (req, res) => {
       .skip(offset)
       .lean()
       .exec();
-
-    console.log('REQ USER:', req.user);
-    console.log('DEMO EMAIL:', config.DEMO_ADMIN_EMAIL);
     
     // Hide real admin emails from demo admin
     if (
