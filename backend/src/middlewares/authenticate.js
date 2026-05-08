@@ -26,7 +26,7 @@ const authenticate = async (req, res, next) => {
     const decoded = verifyAccessToken(token);
 
     // Check if user is banned
-    const user = await User.findById(decoded.id).select('isBanned');
+    const user = await User.findById(decoded.id).select('email role isBanned');
     if (user?.isBanned) {
       return res.status(403).json({
         code: 'AuthorizationError',
@@ -34,6 +34,7 @@ const authenticate = async (req, res, next) => {
       });
     }
 
+    req.user = user;
     req.userId = decoded.id;
     return next();
     

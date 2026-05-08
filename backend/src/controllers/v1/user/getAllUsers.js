@@ -19,6 +19,9 @@ const getAllUsers = async (req, res) => {
       .skip(offset)
       .lean()
       .exec();
+
+    console.log('REQ USER:', req.user);
+    console.log('DEMO EMAIL:', config.DEMO_ADMIN_EMAIL);
     
     // Hide real admin emails from demo admin
     if (
@@ -30,7 +33,7 @@ const getAllUsers = async (req, res) => {
         // Hide real admin email
         if (
           user.role === 'admin' &&
-          user.email !== config.DEMO_ADMIN_EMAIL
+          user.email?.toLowerCase() !== config.DEMO_ADMIN_EMAIL
         ) {
           return {
             ...user,
