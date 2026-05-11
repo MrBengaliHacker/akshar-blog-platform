@@ -18,6 +18,7 @@ const getAllUsers = require('../../controllers/v1/user/getAllUsers');
 const getUser = require('../../controllers/v1/user/getUser');
 const deleteUser = require('../../controllers/v1/user/deleteUser');
 const banUser = require('../../controllers/v1/user/banUser');
+const getPublicProfile = require('../../controllers/v1/user/getPublicProfile');
 
 // Models
 const User = require('../../models/user');
@@ -155,6 +156,15 @@ router.patch(
     .withMessage('Invalid user ID'),
   validationError,
   banUser,
+);
+
+router.get(
+  '/profile/:userId',
+  param('userId')
+    .isMongoId()
+    .withMessage('Invalid user ID'),
+  validationError,
+  getPublicProfile,
 );
 
 module.exports = router;

@@ -28,8 +28,6 @@ router.post(
 
 router.get(
   '/blog/:blogId',
-  authenticate,
-  authorize(['admin', 'user']),
   param('blogId')
     .isMongoId()
     .withMessage('Invalid blog ID'),

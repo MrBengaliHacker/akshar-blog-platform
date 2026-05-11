@@ -4,25 +4,18 @@ const config = require('../../../config');
 
 // Models
 const Blog = require('../../../models/blog');
-const User = require('../../../models/user');
+
 
 const getAllBlogs = async (req, res) => {
   try {
-    const userId = req.userId;
     const limit = parseInt(req.query.limit) || config.DEFAULT_RES_LIMIT;
     const offset = parseInt(req.query.offset) || config.DEFAULT_RES_OFFSET;
 
-    // Check user role to filter blogs
-    const user = await User.findById(userId)
-      .select('role')
-      .lean()
-      .exec();
+    const query = { status: 'published' };
 
-    const query = {};
-
-    // Show only published posts to normal users
-    if (user?.role === 'user') {
-      query.status = 'published';
+    // Admin can also see drafts
+    if (req.user?.role === 'admin') {
+      delete query.status;
     }
 
     const total = await Blog.countDocuments(query);

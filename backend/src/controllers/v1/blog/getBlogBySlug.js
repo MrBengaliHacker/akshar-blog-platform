@@ -4,18 +4,11 @@ const config = require('../../../config');
 
 // Models
 const Blog = require('../../../models/blog');
-const User = require('../../../models/user');
+
 
 const getBlogBySlug = async (req, res) => {
   try {
-    const userId = req.userId;
     const { slug } = req.params;
-
-    // Check current user role
-    const user = await User.findById(userId)
-      .select('role')
-      .lean()
-      .exec();
 
     const blog = await Blog.findOne({ slug })
       .select('-banner.publicId -__v')
@@ -30,13 +23,29 @@ const getBlogBySlug = async (req, res) => {
       });
     }
 
-    // Block normal users from viewing draft blogs
-    if (user?.role === 'user' && blog.status === 'draft') {
-      logger.warn('User tried to access a draft blog', { userId, slug });
-      return res.status(403).json({
-        code: 'AuthorizationError',
-        message: 'Access denied, insufficient permissions',
-      });
+    // Draft blogs only visible to admin or owner
+    if (blog.status === 'draft') {
+      if (!req.user) {
+        return res.status(403).json({
+          code: 'AuthorizationError',
+          message: 'Access denied',
+        });
+      }
+
+      const isAdmin = req.user.role === 'admin';
+      const isOwner = blog.author._id.toString() === req.user._id.toString();
+
+      if (!isAdmin && !isOwner) {
+        logger.warn('Unauthorized draft blog access attempt', {
+          slug,
+          userId: req.user._id,
+        });
+
+        return res.status(403).json({
+          code: 'AuthorizationError',
+          message: 'Access denied, insufficient permissions',
+        });
+      }
     }
 
     logger.info('Blog fetched by slug', { slug, blogId: blog._id });

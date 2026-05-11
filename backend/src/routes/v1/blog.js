@@ -51,8 +51,6 @@ router.post(
 
 router.get(
   '/',
-  authenticate,
-  authorize(['admin', 'user']),
   query('limit')
     .optional()
     .isInt({ min: 1, max: 50 })
@@ -67,8 +65,6 @@ router.get(
 
 router.get(
   '/user/:userId',
-  authenticate,
-  authorize(['admin', 'user']),
   param('userId')
     .isMongoId()
     .withMessage('Invalid user ID'),
@@ -86,8 +82,6 @@ router.get(
 
 router.get(
   '/:slug',
-  authenticate,
-  authorize(['admin', 'user']),
   param('slug')
     .notEmpty()
     .withMessage('Slug is required'),
