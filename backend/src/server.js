@@ -43,6 +43,7 @@ const corsOptions = {
       callback(null, false);
     }
   },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
