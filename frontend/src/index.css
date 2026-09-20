@@ -55,6 +55,20 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0.025em;
   --spacing: 0.25rem;
+
+
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(139, 92, 246, 0.2);
+
+  --gradient-primary: linear-gradient(
+    135deg,
+    rgb(139, 92, 246),
+    rgb(192, 132, 252)
+);
+
+--shadow-glow:
+  0 0 20px rgba(139, 92, 246, 0.25),
+  0 0 60px rgba(139, 92, 246, 0.15);
 }
 
 .dark {
@@ -107,6 +121,22 @@
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
     0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+
+
+
+
+  --glass-bg: rgba(24, 24, 27, 0.8);
+--glass-border: rgba(139, 92, 246, 0.25);
+
+--gradient-primary: linear-gradient(
+  135deg,
+  rgb(139, 92, 246),
+  rgb(192, 132, 252)
+);
+
+--shadow-glow:
+  0 0 25px rgba(139, 92, 246, 0.35),
+  0 0 80px rgba(139, 92, 246, 0.2);
 }
 
 @theme inline {
@@ -277,4 +307,41 @@ body {
   .nav-link.active {
     @apply bg-accent;
   }
+}
+
+
+
+
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.border-gradient {
+  position: relative;
+}
+
+.border-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--gradient-primary);
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
 }
