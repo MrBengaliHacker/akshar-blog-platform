@@ -2,6 +2,16 @@
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant data-open (&[data-state="open"]);
+@custom-variant data-closed (&[data-state="closed"]);
+@custom-variant data-active (&[data-state="active"]);
+@custom-variant data-inactive (&[data-state="inactive"]);
+@custom-variant data-checked (&[data-state="checked"]);
+@custom-variant data-unchecked (&[data-state="unchecked"]);
+@custom-variant data-horizontal (&[data-orientation="horizontal"]);
+@custom-variant data-vertical (&[data-orientation="vertical"]);
+@custom-variant data-disabled (&[data-disabled]);
+@custom-variant data-inset (&[data-inset="true"]);
 
 :root {
   --background: hsl(48 33.3333% 97.0588%);
@@ -10,7 +20,7 @@
   --card-foreground: hsl(60 1.9608% 10%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(50.7692 19.403% 13.1373%);
-  --primary: hsl(28 100% 50%);
+  --primary: hsl(258 90% 66%);
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(46.1538 22.807% 88.8235%);
   --secondary-foreground: hsl(50.7692 8.4967% 30%);
@@ -22,7 +32,7 @@
   --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(50 7.5% 84.3137%);
   --input: hsl(50.7692 7.9755% 68.0392%);
-  --ring: hsl(28 100% 50%);
+  --ring: hsl(258 90% 66%);
   --chart-1: hsl(27.7457 76.8889% 44.1176%);
   --chart-2: hsl(251.4545 84.6154% 74.5098%);
   --chart-3: hsl(46.1538 28.2609% 81.9608%);
@@ -78,7 +88,7 @@
   --card-foreground: hsl(48 33.3333% 97.0588%);
   --popover: hsl(60 2.1277% 18.4314%);
   --popover-foreground: hsl(60 5.4545% 89.2157%);
-  --primary: hsl(24.5815 94.9791% 53.1373%);
+  --primary: hsl(258 90% 66%);
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(48 33.3333% 97.0588%);
   --secondary-foreground: hsl(60 2.1277% 18.4314%);
@@ -90,7 +100,7 @@
   --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(60 5.0847% 23.1373%);
   --input: hsl(52.5 5.1282% 30.5882%);
-  --ring: hsl(24.5815 94.9791% 53.1373%);
+  --ring: hsl(258 90% 66%);
   --chart-1: hsl(24.8619 73.8776% 48.0392%);
   --chart-2: hsl(251.4545 84.6154% 74.5098%);
   --chart-3: hsl(48 9.8039% 10%);

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import Avatar from "react-avatar";
+import { SettingsDialog } from '@/components/SettingsDialog';
 
 // Custom Hooks
 import { useUser } from '@/hooks/useUser';
@@ -62,10 +63,14 @@ export const UserMenu = () => {
                 </Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem>
-              <SettingsIcon />
-              Settings
-            </DropdownMenuItem>
+
+            <SettingsDialog>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <SettingsIcon />
+                Settings
+              </DropdownMenuItem>
+            </SettingsDialog>
+
             <DropdownMenuItem onClick={logout}>
               <LogOutIcon />
               Logout

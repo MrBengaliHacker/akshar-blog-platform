@@ -43,8 +43,11 @@ router.patch(
     .trim()
     .isLength({ max: 20 })
     .withMessage('Username must be less than 20 characters')
-    .custom(async (value) => {
-      const exists = await User.exists({ username: value });
+    .custom(async (value, { req }) => {
+      const exists = await User.exists({ 
+        username: value,
+        _id: { $ne: req.userId },
+      });
       if (exists) throw new Error('Username already in use');
     }),
 
@@ -56,8 +59,11 @@ router.patch(
     .withMessage('Email must be less than 50 characters')
     .isEmail()
     .withMessage('Invalid email address')
-    .custom(async (value) => {
-      const exists = await User.exists({ email: value });
+    .custom(async (value, { req }) => {
+      const exists = await User.exists({ 
+        email: value,
+        _id: { $ne: req.userId },
+      });
       if (exists) throw new Error('Email already in use');
     }),
 
