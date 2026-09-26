@@ -2,11 +2,13 @@ import { createBrowserRouter } from "react-router";
 
 // Loaders
 import refreshTokenLoader from "@/routes/loaders/refreshToken";
+import homeLoader from "@/routes/loaders/user/home";
 
 // Pages
 import { Login } from "@/pages/auth/Login";
 import { Signup } from "@/pages/auth/Signup";
 import { RootLayout } from "@/components/layouts/Root";
+import { Home } from "@/pages/user/Home";
 
 // Actions
 import signupAction from "@/routes/actions/auth/signup";
@@ -36,6 +38,8 @@ const router = createBrowserRouter([
     children:[
       {
         index: true,
+        Component: Home,
+        loader: homeLoader,
       },
       {
         path: 'blogs',

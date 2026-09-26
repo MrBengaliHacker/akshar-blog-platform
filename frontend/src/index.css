@@ -14,9 +14,9 @@
 @custom-variant data-inset (&[data-inset="true"]);
 
 :root {
-  --background: hsl(48 33.3333% 97.0588%);
+  --background: hsl(258 20% 97%);
   --foreground: hsl(44 19.4805% 15.098%);
-  --card: hsl(48 33.3333% 97.0588%);
+  --card: hsl(258 30% 98%);
   --card-foreground: hsl(60 1.9608% 10%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(50.7692 19.403% 13.1373%);
@@ -82,9 +82,9 @@
 }
 
 .dark {
-  --background: hsl(60 2.7027% 14.5098%);
+  --background: hsl(258 8% 12%);
   --foreground: hsl(51.4286 25.9259% 94.7059%);
-  --card: hsl(60 2.7027% 14.5098%);
+  --card: hsl(258 15% 20%);
   --card-foreground: hsl(48 33.3333% 97.0588%);
   --popover: hsl(60 2.1277% 18.4314%);
   --popover-foreground: hsl(60 5.4545% 89.2157%);
