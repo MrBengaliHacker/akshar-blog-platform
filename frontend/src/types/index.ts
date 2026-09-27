@@ -121,3 +121,12 @@ export interface AuthResponse {
 export interface BlogCreateResponse {
   blog: Blog;
 }
+
+export interface PublicProfileBlog extends Omit<Blog, 'author' | 'content'> {
+  content?: never;
+}
+
+export interface PublicProfileResponse {
+  user: Omit<User, 'email'>;
+  blogs: PublicProfileBlog[];
+}

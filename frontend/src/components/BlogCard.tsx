@@ -19,7 +19,7 @@ interface BlogCardProps extends React.ComponentProps<'div'> {
   bannerWidth: number;
   bannerHeight: number;
   title: string;
-  content: string;
+  content?: string;
   slug: string;
   authorName: string;
   publishedAt: string;
@@ -40,6 +40,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({
   ...props
 }) => {
   const plainText = useMemo(() => {
+    if (!content) return '';
     const editor = new Editor({
       extensions: [StarterKit],
       content,
