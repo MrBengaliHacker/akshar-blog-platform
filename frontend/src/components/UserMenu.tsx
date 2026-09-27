@@ -57,7 +57,7 @@ export const UserMenu = () => {
           <DropdownMenuGroup>
             {user.role === 'admin' && (
               <DropdownMenuItem asChild>
-                <Link to="/dashboard" viewTransition>
+                <Link to="/admin/dashboard" viewTransition>
                   <LayoutDashboardIcon />
                   Dashboard
                 </Link>

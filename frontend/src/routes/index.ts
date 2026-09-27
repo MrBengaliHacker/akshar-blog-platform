@@ -6,6 +6,7 @@ import homeLoader from "@/routes/loaders/user/home";
 import userBlogLoader from "@/routes/loaders/user/blogs";
 import blogDetailLoader from "@/routes/loaders/user/blogDetail";
 import profileLoader from "@/routes/loaders/user/profile";
+import adminLoader from "@/routes/loaders/admin/admin";
 
 // Pages
 import { Login } from "@/pages/auth/Login";
@@ -15,6 +16,7 @@ import { Home } from "@/pages/user/Home";
 import { Blogs } from "@/pages/user/Blogs";
 import { BlogDetail } from "@/pages/user/BlogDetail";
 import { Profile } from "@/pages/user/Profile";
+import { AdminLayout } from "@/components/layouts/AdminLayout";
 
 // Actions
 import signupAction from "@/routes/actions/auth/signup";
@@ -22,6 +24,7 @@ import loginAction from "@/routes/actions/auth/login";
 import settingsAction from "@/routes/actions/user/settings";
 
 // Error boundries
+import { RootErrorBoundary } from "@/pages/error/Root";
 
 const router = createBrowserRouter([
   {
@@ -66,24 +69,33 @@ const router = createBrowserRouter([
   },
   {
     path: 'admin',
+    Component: AdminLayout,
+    loader: adminLoader,
+    ErrorBoundary: RootErrorBoundary,
     children:[
       {
         path: 'dashboard',
+        handle: { breadcrumb: 'Dashboard' },
       },
       {
         path: 'blogs',
+        handle: { breadcrumb: 'Blogs' },
       },
       {
         path: 'blogs/create',
+        handle: { breadcrumb: 'Create a new blog' },
       },
       {
         path: 'blogs/:slug/edit',
+        handle: { breadcrumb: 'Edit blog' },
       },
       {
         path: 'comments',
+        handle: { breadcrumb: 'Comments' },
       },
       {
         path: 'users',
+        handle: { breadcrumb: 'Users' },
       },
     ]
   },
