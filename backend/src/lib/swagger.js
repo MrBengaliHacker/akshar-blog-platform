@@ -351,7 +351,7 @@ This API uses JWT Bearer token authentication.
                       total: { type: 'number' },
                       limit: { type: 'number' },
                       offset: { type: 'number' },
-                      data: {
+                      users: {
                         type: 'array',
                         items: { $ref: '#/components/schemas/User' },
                       },

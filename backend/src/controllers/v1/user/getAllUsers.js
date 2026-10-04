@@ -48,7 +48,7 @@ const getAllUsers = async (req, res) => {
       total,
       limit,
       offset,
-      data: users,
+      users,
     });
 
   } catch (err) {

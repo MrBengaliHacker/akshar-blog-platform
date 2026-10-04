@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 // Middlewares
 const authenticate = require('../../middlewares/authenticate');
@@ -10,6 +10,7 @@ const validationError = require('../../middlewares/validationError');
 const commentBlog = require('../../controllers/v1/comment/commentBlog');
 const getCommentsByBlog = require('../../controllers/v1/comment/getCommentsByBlog');
 const deleteComment = require('../../controllers/v1/comment/deleteComment');
+const getAllComments = require('../../controllers/v1/comment/getAllComments');
 
 router.post(
   '/blog/:blogId',
@@ -33,6 +34,25 @@ router.get(
     .withMessage('Invalid blog ID'),
   validationError,
   getCommentsByBlog,
+);
+
+router.get(
+  '/',
+  authenticate,
+  authorize(['admin']),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage('Limit must be an integer between 1 and 50'),
+
+  query('offset')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Offset must be a positive integer'),
+
+  validationError,
+  getAllComments,
 );
 
 router.delete(
