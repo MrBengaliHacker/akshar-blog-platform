@@ -51,9 +51,8 @@ export interface Comment {
   _id: string;
   content: string;
   likesCount: number;
-  user: User | null;
-  blog: Blog;
-  replies: Comment[];
+  userId: User | null;
+  blogId: Blog;
   createdAt: string;
   updatedAt: string;
 }

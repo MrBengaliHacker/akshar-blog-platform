@@ -7,6 +7,10 @@ import userBlogLoader from "@/routes/loaders/user/blogs";
 import blogDetailLoader from "@/routes/loaders/user/blogDetail";
 import profileLoader from "@/routes/loaders/user/profile";
 import adminLoader from "@/routes/loaders/admin/admin";
+import dashboardLoader from "@/routes/loaders/admin/dashboard";
+import allBlogLoader from "@/routes/loaders/admin/blogs";
+import allCommentLoader from "@/routes/loaders/admin/comments";
+import allUserLoader from "@/routes/loaders/admin/users";
 
 // Pages
 import { Login } from "@/pages/auth/Login";
@@ -17,11 +21,21 @@ import { Blogs } from "@/pages/user/Blogs";
 import { BlogDetail } from "@/pages/user/BlogDetail";
 import { Profile } from "@/pages/user/Profile";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
+import { Dashboard } from "@/pages/admin/Dashboard";
+import { Blogs as AdminBlogs } from "@/pages/admin/Blogs";
+import { Comments } from "@/pages/admin/Comments";
+import { Users } from "@/pages/admin/Users";
+import { BlogCreate } from "@/pages/admin/BlogCreate";
+import { BlogEdit } from "@/pages/admin/BlogEdit";
 
 // Actions
 import signupAction from "@/routes/actions/auth/signup";
 import loginAction from "@/routes/actions/auth/login";
 import settingsAction from "@/routes/actions/user/settings";
+import blogEditAction from "@/routes/actions/admin/blogEdit";
+import blogsAction from "@/routes/actions/admin/blogsAction";
+import allUserAction from "@/routes/actions/admin/user";
+import blogCreateAction from "@/routes/actions/admin/blogCreate";
 
 // Error boundries
 import { RootErrorBoundary } from "@/pages/error/Root";
@@ -75,26 +89,41 @@ const router = createBrowserRouter([
     children:[
       {
         path: 'dashboard',
+        Component: Dashboard,
+        loader: dashboardLoader,
         handle: { breadcrumb: 'Dashboard' },
       },
       {
         path: 'blogs',
+        Component: AdminBlogs,
+        loader: allBlogLoader,
+        action: blogsAction,
         handle: { breadcrumb: 'Blogs' },
       },
       {
         path: 'blogs/create',
+        Component: BlogCreate,
+        action: blogCreateAction,
         handle: { breadcrumb: 'Create a new blog' },
       },
       {
         path: 'blogs/:slug/edit',
+        Component: BlogEdit,
+        loader: blogDetailLoader,
+        action: blogEditAction,
         handle: { breadcrumb: 'Edit blog' },
       },
       {
         path: 'comments',
+        Component: Comments,
+        loader: allCommentLoader,
         handle: { breadcrumb: 'Comments' },
       },
       {
         path: 'users',
+        Component: Users,
+        loader: allUserLoader,
+        action: allUserAction,
         handle: { breadcrumb: 'Users' },
       },
     ]
