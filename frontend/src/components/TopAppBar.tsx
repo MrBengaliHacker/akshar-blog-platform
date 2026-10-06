@@ -44,10 +44,14 @@ export const TopAppBar = ({
       </div>
 
       <div className='flex items-center gap-2 ms-auto'>
-        {location.pathname !== '/admin/blogs/create' && (
+        {!location.pathname.endsWith('/blogs/create') && (
           <Button asChild>
             <Link
-              to='/admin/blogs/create'
+              to={
+                location.pathname.startsWith('/admin')
+                  ? '/admin/blogs/create'
+                  : '/dashboard/blogs/create'
+              }
               viewTransition
             >
               <PlusIcon />

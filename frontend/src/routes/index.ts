@@ -11,6 +11,8 @@ import dashboardLoader from "@/routes/loaders/admin/dashboard";
 import allBlogLoader from "@/routes/loaders/admin/blogs";
 import allCommentLoader from "@/routes/loaders/admin/comments";
 import allUserLoader from "@/routes/loaders/admin/users";
+import authGuardLoader from "@/routes/loaders/user/authGuard";
+import myBlogsLoader from "@/routes/loaders/user/myBlogs";
 
 // Pages
 import { Login } from "@/pages/auth/Login";
@@ -27,6 +29,8 @@ import { Comments } from "@/pages/admin/Comments";
 import { Users } from "@/pages/admin/Users";
 import { BlogCreate } from "@/pages/admin/BlogCreate";
 import { BlogEdit } from "@/pages/admin/BlogEdit";
+import { UserDashboardLayout } from "@/components/layouts/UserDashboardLayout";
+import { MyBlogs } from "@/pages/user/MyBlogs";
 
 // Actions
 import signupAction from "@/routes/actions/auth/signup";
@@ -78,6 +82,34 @@ const router = createBrowserRouter([
         path: 'profile/:userId',
         Component: Profile,
         loader: profileLoader,
+      },
+    ]
+  },
+  {
+    path: 'dashboard',
+    Component: UserDashboardLayout,
+    loader: authGuardLoader,
+    ErrorBoundary: RootErrorBoundary,
+    children:[
+      {
+        index: true,
+        Component: MyBlogs,
+        loader: myBlogsLoader,
+        action: blogsAction,
+        handle: { breadcrumb: 'My Blogs' },
+      },
+      {
+        path: 'blogs/create',
+        Component: BlogCreate,
+        action: blogCreateAction,
+        handle: { breadcrumb: 'Create a new blog' },
+      },
+      {
+        path: 'blogs/:slug/edit',
+        Component: BlogEdit,
+        loader: blogDetailLoader,
+        action: blogEditAction,
+        handle: { breadcrumb: 'Edit blog' },
       },
     ]
   },

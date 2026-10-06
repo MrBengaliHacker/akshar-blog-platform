@@ -44,7 +44,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import Avatar from 'react-avatar';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip';
 const MotionTableBody = motion.create(TableBody);
 const MotionTableRow = motion.create(TableRow);
 
@@ -60,7 +64,6 @@ interface BlogTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
-
 
 // Framer motion variants
 const tableBodyVariant: Variants = {
@@ -84,10 +87,7 @@ const tableRowVariant: Variants = {
 const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
   const fetcher = useFetcher();
 
-  const isPublished = useMemo(
-    () => blog.status === 'published',
-    [blog.status]
-  );
+  const isPublished = useMemo(() => blog.status === 'published', [blog.status]);
 
   const isChanging = fetcher.state !== 'idle';
   const isUpdating = isChanging && fetcher.formMethod === 'PUT';
@@ -111,7 +111,7 @@ const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
       >
         <DropdownMenuItem asChild>
           <Link
-            to={`/admin/blogs/${blog.slug}/edit`}
+            to={`${location.pathname.startsWith('/admin') ? '/admin' : '/dashboard'}/blogs/${blog.slug}/edit`}
             viewTransition
           >
             Edit
@@ -150,7 +150,7 @@ const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
 
                   formData.append(
                     'status',
-                    isPublished ? 'draft' : 'published'
+                    isPublished ? 'draft' : 'published',
                   );
 
                   fetcher.submit(formData, {
@@ -171,23 +171,21 @@ const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <DropdownMenuItem
-            variant='destructive'
+              variant='destructive'
               onSelect={(e) => e.preventDefault()}
               disabled={isUpdating}
             >
               {isDeleting && <Loader2Icon className='animate-spin' />}
-
               Delete
             </DropdownMenuItem>
           </AlertDialogTrigger>
 
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>
-                Delete Blog Post?
-              </AlertDialogTitle>
+              <AlertDialogTitle>Delete Blog Post?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. Are you sure you want to delete this blog post permanently?
+                This action cannot be undone. Are you sure you want to delete
+                this blog post permanently?
               </AlertDialogDescription>
             </AlertDialogHeader>
 
@@ -234,12 +232,12 @@ export const columns: ColumnDef<Blog>[] = [
           viewTransition
         >
           <figure className='shrink-0 w-30 h-17 rounded-md overflow-hidden'>
-            <img 
-              src={blog.banner.url} 
-              width={blog.banner.width} 
-              height={blog.banner.height} 
-              alt={blog.title} 
-              className='w-full h-full object-cover' 
+            <img
+              src={blog.banner.url}
+              width={blog.banner.width}
+              height={blog.banner.height}
+              alt={blog.title}
+              className='w-full h-full object-cover'
             />
           </figure>
 
@@ -252,7 +250,6 @@ export const columns: ColumnDef<Blog>[] = [
               {editor.getText()}
             </p>
           </div>
-
         </Link>
       );
     },
@@ -290,7 +287,7 @@ export const columns: ColumnDef<Blog>[] = [
             'gap-1.5 capitalize',
             status === 'published'
               ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-100/20 dark:bg-emerald-800/20'
-              : 'border-amber-300 dark:border-amber-800 bg-amber-100/20 dark:bg-amber-800/20'
+              : 'border-amber-300 dark:border-amber-800 bg-amber-100/20 dark:bg-amber-800/20',
           )}
         >
           <div
@@ -298,7 +295,7 @@ export const columns: ColumnDef<Blog>[] = [
               'w-1.5 h-1.5 rounded-full',
               status === 'published'
                 ? 'bg-emerald-500 dark:bg-emerald-600'
-                : 'bg-amber-500 dark:bg-amber-600'
+                : 'bg-amber-500 dark:bg-amber-600',
             )}
           />
           {status}
@@ -350,7 +347,10 @@ export const BlogTable = <TData, TValue>({
     <Table>
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className='border-none'>
+          <TableRow
+            key={headerGroup.id}
+            className='border-none'
+          >
             {headerGroup.headers.map((header) => (
               <TableHead
                 key={header.id}
@@ -361,7 +361,7 @@ export const BlogTable = <TData, TValue>({
                   ? null
                   : flexRender(
                       header.column.columnDef.header,
-                      header.getContext()
+                      header.getContext(),
                     )}
               </TableHead>
             ))}
@@ -393,7 +393,10 @@ export const BlogTable = <TData, TValue>({
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={columns.length} className='h-24 text-center'>
+            <TableCell
+              colSpan={columns.length}
+              className='h-24 text-center'
+            >
               No results.
             </TableCell>
           </TableRow>

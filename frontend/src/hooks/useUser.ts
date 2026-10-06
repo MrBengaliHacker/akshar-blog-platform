@@ -3,7 +3,7 @@ import { useState } from 'react';
 // Types
 import type { User } from '@/types';
 
-export type UserResponse = Pick<User, 'username' | 'email' | 'role'>;
+export type UserResponse = Pick<User, '_id' | 'username' | 'email' | 'role'>;
 
 export const useUser = () => {
   const [user] = useState<UserResponse | undefined>(() => {
