@@ -9,11 +9,27 @@ import { AxiosError } from 'axios';
 
 const blogDetailLoader: LoaderFunction = async ({ params }) => {
   const slug = params.slug;
+  const accessToken = localStorage.getItem('accessToken');
 
   try {
-    const { data } = await aksharApi.get(`/blogs/${slug}`);
+    const { data: blogData } = await aksharApi.get(`/blogs/${slug}`);
 
-    return data;
+    let liked = false;
+
+    if (accessToken) {
+      try {
+        const { data: likeData } = await aksharApi.get(
+          `/likes/blog/${blogData.blog._id}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        );
+        liked = likeData.liked;
+      } catch {
+        // If like status check fails, default to not liked — don't block the whole page
+        liked = false;
+      }
+    }
+
+    return { ...blogData, liked };
   } catch (err) {
     if (err instanceof AxiosError) {
       throw data(err.response?.data?.message || err.message, {
