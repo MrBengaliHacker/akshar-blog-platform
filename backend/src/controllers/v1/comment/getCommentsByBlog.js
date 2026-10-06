@@ -23,7 +23,8 @@ const getCommentsByBlog = async (req, res) => {
 
     const comments = await Comment.find({ blogId })
       .select('-__v')
-      .populate('userId', 'username avatar -__v')
+      .populate('userId', 'username avatar')
+      .populate('blogId', 'title slug banner')
       .sort({ createdAt: -1 })
       .lean()
       .exec();

@@ -42,8 +42,12 @@ const commentBlog = async (req, res) => {
     blog.commentsCount++;
     await blog.save();
 
-    const commentObject = newComment.toObject();
-    delete commentObject.__v;
+    const commentObject = await Comment.findById(newComment._id)
+      .select('-__v')
+      .populate('userId', 'username avatar')
+      .populate('blogId', 'title slug banner')
+      .lean()
+      .exec();
 
     logger.info('New comment created', {
       commentId: newComment._id,

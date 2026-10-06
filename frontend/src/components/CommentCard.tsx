@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { formatDistanceToNow } from "date-fns";
-
+import { toast } from "sonner";
 
 // Components
 import Avatar from "react-avatar";
@@ -14,38 +15,89 @@ import {
 
 // Custom modules
 import { getUsername } from "@/lib/utils";
+import { aksharApi } from "@/api";
 
 // Assets
 import {
   ThumbsUpIcon,
   TrashIcon,
   SquareArrowOutUpRightIcon,
+  Loader2Icon,
 } from "lucide-react";
 
-
 // Types
-import type { User, Blog } from '@/types';
+import type { User, Blog } from "@/types";
 
 type Props = {
+  commentId?: string;
   content: string;
   likesCount: number;
   user: User | null;
   blog: Blog;
   createdAt: string;
+  currentUserId?: string;
+  currentUserRole?: "user" | "admin";
+  onDeleteSuccess?: () => void;
 };
 
 export const CommentCard = ({
+  commentId,
   content,
   likesCount,
   user,
   blog,
   createdAt,
+  currentUserId,
+  currentUserRole,
+  onDeleteSuccess,
 }: Props) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const canDelete =
+    !!commentId &&
+    !!currentUserId &&
+    (currentUserId === user?._id || currentUserRole === "admin");
+
+  const handleDelete = async () => {
+  if (!commentId || !canDelete || isDeleting) {
+    return;
+  }
+
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    toast.error("Please log in to delete this comment");
+    return;
+  }
+
+  try {
+    setIsDeleting(true);
+
+    await aksharApi.delete(`/comments/${commentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    toast.success("Comment deleted");
+
+    onDeleteSuccess?.();
+  } catch (error: any) {
+    console.error("Error deleting comment:", error);
+
+    toast.error(
+      error?.response?.data?.message || "Failed to delete comment",
+    );
+  } finally {
+    setIsDeleting(false);
+  }
+};
+
   return (
     <div className="@container">
       <div className="group flex flex-col items-start gap-4 p-4 rounded-xl hover:bg-accent/25 @md:flex-row">
         <Avatar
-          name={user ? getUsername(user) : 'Deleted User'}
+          name={user ? getUsername(user) : "Deleted User"}
           email={user?.email}
           size="40"
           round
@@ -69,18 +121,20 @@ export const CommentCard = ({
               </div>
             )}
 
-            <div className="size-1 rounded-full bg-muted-foreground/50"></div>
+            <div className="size-1 rounded-full bg-muted-foreground/50" />
 
             <div className="text-sm text-muted-foreground">
               <Tooltip delayDuration={250}>
                 <TooltipTrigger>
-                  {formatDistanceToNow(createdAt, { addSuffix: true })}
+                  {formatDistanceToNow(createdAt, {
+                    addSuffix: true,
+                  })}
                 </TooltipTrigger>
 
                 <TooltipContent>
-                  {new Date(createdAt).toLocaleString('en-US', {
-                    dateStyle: 'long',
-                    timeStyle: 'short',
+                  {new Date(createdAt).toLocaleString("en-US", {
+                    dateStyle: "long",
+                    timeStyle: "short",
                   })}
                 </TooltipContent>
               </Tooltip>
@@ -103,50 +157,59 @@ export const CommentCard = ({
               )}
             </Button>
 
-            <Button
-              variant="ghost"
-              aria-label="Remove comment"
-            >
-              <TrashIcon />
-              Remove
-            </Button>
+            {canDelete && (
+              <Button
+                variant="ghost"
+                aria-label="Remove comment"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <Loader2Icon className="animate-spin" />
+                ) : (
+                  <TrashIcon />
+                )}
+
+                {isDeleting ? "Removing..." : "Remove"}
+              </Button>
+            )}
           </div>
         </div>
 
         {blog && (
           <>
-          <div className="max-w-80 grid grid-cols-[120px_minmax(200px,1fr)] gap-3 @max-3xl:hidden">
-            <AspectRatio
-              ratio={21 / 9}
-              className="rounded-lg overflow-hidden"
-            >
-              <img
-                src={blog.banner.url}
-                width={blog.banner.width}
-                height={blog.banner.height}
-                alt={blog.title}
-              />
-            </AspectRatio>
+            <div className="max-w-80 grid grid-cols-[120px_minmax(200px,1fr)] gap-3 @max-3xl:hidden">
+              <AspectRatio
+                ratio={21 / 9}
+                className="rounded-lg overflow-hidden"
+              >
+                <img
+                  src={blog.banner.url}
+                  width={blog.banner.width}
+                  height={blog.banner.height}
+                  alt={blog.title}
+                />
+              </AspectRatio>
 
-            <div className="line-clamp-3 max-w-[30ch] text-sm text-muted-foreground my-1">
-              {blog.title}
+              <div className="line-clamp-3 max-w-[30ch] text-sm text-muted-foreground my-1">
+                {blog.title}
+              </div>
             </div>
-          </div>
 
-          <Button
-            variant="ghost"
-            className="@3xl:invisible @xl:group-hover:visible @xl:group-focus-within:visible"
-            asChild
-          >
-            <Link
-              to={`/blogs/${blog.slug}`}
-              viewTransition
+            <Button
+              variant="ghost"
+              className="@3xl:invisible @xl:group-hover:visible @xl:group-focus-within:visible"
+              asChild
             >
-              <span className="@md:hidden">Go to blog</span>
+              <Link
+                to={`/blogs/${blog.slug}`}
+                viewTransition
+              >
+                <span className="@md:hidden">Go to blog</span>
 
-              <SquareArrowOutUpRightIcon />
-            </Link>
-          </Button>
+                <SquareArrowOutUpRightIcon />
+              </Link>
+            </Button>
           </>
         )}
       </div>
