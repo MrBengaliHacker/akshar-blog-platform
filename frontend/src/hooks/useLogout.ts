@@ -10,20 +10,25 @@ export const useLogout = () => {
   return async () => {
     const accessToken = localStorage.getItem("accessToken");
 
-    const response = await aksharApi.post(
-      "/auth/logout",
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      },
-    );
-    if (response.status >= 400) return;
-
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
+    try {
+      if (accessToken) {
+        await aksharApi.post(
+          "/auth/logout",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          },
+        );
+      }
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+    }
 
     if (location.pathname === "/") {
       window.location.reload();
