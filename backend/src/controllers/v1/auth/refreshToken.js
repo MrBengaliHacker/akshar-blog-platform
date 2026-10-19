@@ -7,6 +7,7 @@ const config = require('../../../config');
 
 // Models
 const Token = require('../../../models/token');
+const User = require('../../../models/user');
 
 const refreshTokenHandler = async (req, res) => {
     try {
@@ -29,6 +30,19 @@ const refreshTokenHandler = async (req, res) => {
 
       // verify the refresh token
       const decoded = verifyRefreshToken(refreshToken);
+
+      // the user must still exist and must not be banned
+      const user = await User.findById(decoded.id).select('isBanned');
+
+      if (!user || user.isBanned) {
+        // remove all sessions of this user
+        await Token.deleteMany({ userId: decoded.id });
+
+        return res.status(user ? 403 : 401).json({
+          code: user ? 'AuthorizationError' : 'AuthenticationError',
+          message: user ? 'Your account has been banned' : 'Invalid refresh token',
+        });
+      }
 
       // generate a new access token
       const newAccessToken = generateAccessToken(decoded.id);

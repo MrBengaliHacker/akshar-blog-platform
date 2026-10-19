@@ -25,9 +25,17 @@ const authenticate = async (req, res, next) => {
     // Verify the token and extract the user ID
     const decoded = verifyAccessToken(token);
 
-    // Check if user is banned
+    // Check if user exists and is not banned
     const user = await User.findById(decoded.id).select('email role isBanned');
-    if (user?.isBanned) {
+
+    if (!user) {
+      return res.status(401).json({
+        code: 'AuthenticationError',
+        message: 'Access token invalid',
+      });
+    }
+
+    if (user.isBanned) {
       return res.status(403).json({
         code: 'AuthorizationError',
         message: 'Your account has been banned',

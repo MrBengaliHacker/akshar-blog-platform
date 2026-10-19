@@ -32,6 +32,14 @@ const login = async (req, res) => {
         });
       }
 
+      // banned users cannot log in (checked after the password, so ban status is not leaked)
+      if (user.isBanned) {
+        return res.status(403).json({
+          code: 'AuthorizationError',
+          message: 'Your account has been banned',
+        });
+      }
+
       // generate access and refresh token for the new user
       const accessToken = generateAccessToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
