@@ -1,7 +1,9 @@
 const router = require('express').Router();
 const { body, query, param } = require('express-validator');
 const multer = require('multer');
-const upload = multer();
+
+// Multer - store file in memory buffer (max 1MB)
+const upload = multer({ limits: { fileSize: 1 * 1024 * 1024 } });
 
 // Middlewares
 const authenticate = require('../../middlewares/authenticate');

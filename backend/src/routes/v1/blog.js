@@ -19,8 +19,8 @@ const updateBlog = require('../../controllers/v1/blog/updateBlog');
 const deleteBlog = require('../../controllers/v1/blog/deleteBlog');
 const incrementViewCount = require('../../middlewares/incrementViewCount');
 
-// Multer - store file in memory buffer
-const upload = multer();
+// Multer - store file in memory buffer (max 2MB)
+const upload = multer({ limits: { fileSize: 2 * 1024 * 1024 } });
 
 router.post(
   '/',

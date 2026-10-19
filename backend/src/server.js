@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const helmet = require('helmet');
 const swaggerUi = require('swagger-ui-express');
+const multer = require('multer');
 
 // Custom modules
 const config = require('./config');
@@ -72,6 +73,32 @@ const startServer = async () => {
         message: `Route ${req.method} ${req.url} not found`,
         api: '/api/v1',
         docs: '/api/v1/docs',
+      });
+    });
+
+    // Handle errors (upload size, wrong field name, bad JSON, etc.)
+    app.use((err, req, res, next) => {
+      if (err instanceof multer.MulterError) {
+        const isTooLarge = err.code === 'LIMIT_FILE_SIZE';
+        const maxSize = { banner_image: '2MB', avatar_image: '1MB' };
+
+        return res.status(isTooLarge ? 413 : 400).json({
+          code: 'ValidationError',
+          message: isTooLarge
+            ? `File size must be less than ${maxSize[err.field] ?? '2MB'}`
+            : err.message,
+        });
+      }
+
+      const status = err.status || err.statusCode || 500;
+
+      if (status >= 500) {
+        logger.error('Unhandled error', err);
+      }
+
+      return res.status(status).json({
+        code: status < 500 ? 'BadRequest' : 'ServerError',
+        message: status < 500 ? err.message : 'Internal server error',
       });
     });
 

@@ -2,6 +2,9 @@
 const logger = require('../lib/logger');
 const uploadToCloudinary = require('../lib/cloudinary');
 
+// Models
+const Blog = require('../models/blog');
+
 // Constants
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
@@ -28,14 +31,35 @@ const uploadBlogBanner = (method) => {
     }
 
     try {
-      // Get existing banner publicId for replacement on update
+      // On update: check the blog and its owner BEFORE touching Cloudinary
       let existingPublicId;
       if (method === 'put' && req.params.blogId) {
-        const Blog = require('../models/blog');
         const blog = await Blog.findById(req.params.blogId)
-          .select('banner.publicId')
+          .select('author banner.publicId')
+          .lean()
           .exec();
-        existingPublicId = blog?.banner?.publicId?.replace('blog-api/', '');
+
+        if (!blog) {
+          return res.status(404).json({
+            code: 'NotFound',
+            message: 'Blog not found',
+          });
+        }
+
+        // Only owner or admin can change the banner
+        if (blog.author.toString() !== req.userId && req.user?.role !== 'admin') {
+          logger.warn('Unauthorized blog banner update attempt', {
+            userId: req.userId,
+            blogId: req.params.blogId,
+          });
+
+          return res.status(403).json({
+            code: 'AuthorizationError',
+            message: 'Access denied, insufficient permissions',
+          });
+        }
+
+        existingPublicId = blog.banner?.publicId?.replace('blog-api/', '');
       }
 
       const data = await uploadToCloudinary(
