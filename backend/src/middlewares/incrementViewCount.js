@@ -1,8 +1,7 @@
 // Custom modules
 const logger = require('../lib/logger');
 const Blog = require('../models/blog');
-
-const VIEW_COOKIE_TTL = 24 * 60 * 60 * 1000;
+const { viewCookieOptions } = require('../lib/cookies');
 
 const incrementViewCount = async (req, res, next) => {
   try {
@@ -23,11 +22,7 @@ const incrementViewCount = async (req, res, next) => {
 
       viewedSlugs.push(slug);
 
-      res.cookie('viewed_blogs', JSON.stringify(viewedSlugs), {
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: VIEW_COOKIE_TTL,
-      });
+      res.cookie('viewed_blogs', JSON.stringify(viewedSlugs), viewCookieOptions);
 
       logger.info('View count incremented', { slug, userId: req.userId });
     }

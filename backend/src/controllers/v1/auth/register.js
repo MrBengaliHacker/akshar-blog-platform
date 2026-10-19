@@ -3,6 +3,7 @@ const logger = require('../../../lib/logger');
 const config = require('../../../config');
 const { genUsername } = require('../../../utils');
 const { generateAccessToken, generateRefreshToken } = require('../../../lib/jwt');
+const { refreshCookieOptions } = require('../../../lib/cookies');
 
 // Models
 const User = require('../../../models/user');
@@ -50,12 +51,7 @@ const register = async (req, res) => {
     });
 
     // set the refresh token in an httpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: config.NODE_ENV === 'production',
-      sameSite: 'Strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('refreshToken', refreshToken, refreshCookieOptions);
 
     res.status(201).json({
       user: {

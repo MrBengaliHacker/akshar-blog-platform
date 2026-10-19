@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const { generateAccessToken, generateRefreshToken } = require('../../../lib/jwt');
 const logger = require('../../../lib/logger')
 const config = require('../../../config')
+const { refreshCookieOptions } = require('../../../lib/cookies');
 
 // Models
 const User = require('../../../models/user');
@@ -43,12 +44,7 @@ const login = async (req, res) => {
       });
   
       // set the refresh token in an httpOnly cookie
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: config.NODE_ENV === 'production',
-        sameSite: config.NODE_ENV === 'production' ? 'strict' : 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      res.cookie('refreshToken', refreshToken, refreshCookieOptions);
   
       res.status(200).json({
         user: {

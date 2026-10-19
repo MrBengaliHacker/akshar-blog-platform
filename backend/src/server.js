@@ -17,6 +17,11 @@ const v1Routes = require('./routes/v1');
 
 const app = express();
 
+// Behind Render's proxy: read the real client IP (needed by the rate limiter)
+if (config.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Request size limit — prevents large payload attacks
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));

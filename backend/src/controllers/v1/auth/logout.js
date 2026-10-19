@@ -1,6 +1,7 @@
 //  Custom modules
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
+const { clearCookieOptions } = require('../../../lib/cookies');
 
 // Models
 const Token = require('../../../models/token');
@@ -16,11 +17,7 @@ const logout = async (req, res) => {
       });
     }
 
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: config.NODE_ENV === 'production',
-      sameSite: 'Strict',
-    });
+    res.clearCookie('refreshToken', clearCookieOptions);
 
     res.sendStatus(204);
 

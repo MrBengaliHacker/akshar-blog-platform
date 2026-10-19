@@ -3,6 +3,7 @@ const { v2: cloudinary } = require('cloudinary');
 // Custom modules
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
+const { clearCookieOptions } = require('../../../lib/cookies');
 
 // Models
 const User = require('../../../models/user');
@@ -57,11 +58,7 @@ const deleteCurrentUser = async (req, res) => {
     await User.deleteOne({ _id: userId });
 
     // Clear the refresh token cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
+    res.clearCookie('refreshToken', clearCookieOptions);
 
     logger.info('User account deleted successfully', { userId });
 
