@@ -4,38 +4,26 @@ const config = require('../../../config');
 
 // Models
 const Blog = require('../../../models/blog');
-const User = require('../../../models/user');
 
 const getBlogsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const currentUserId = req.userId;
 
     const limit = parseInt(req.query.limit) || config.DEFAULT_RES_LIMIT;
     const offset = parseInt(req.query.offset) || config.DEFAULT_RES_OFFSET;
 
-    // Check current user role
-    const currentUser = await User.findById(currentUserId)
-      .select('role')
-      .lean()
-      .exec();
+    // Only the owner or an admin can see drafts
+    const canSeeDrafts = req.userId === userId || req.user?.role === 'admin';
 
-    const query = {};
+    const filter = { author: userId };
 
-    // Normal users can only see published blogs
-    if (currentUser?.role === 'user') {
-      query.status = 'published';
+    if (!canSeeDrafts) {
+      filter.status = 'published';
     }
 
-    const total = await Blog.countDocuments({
-      author: userId,
-      ...query,
-    });
+    const total = await Blog.countDocuments(filter);
 
-    const blogs = await Blog.find({
-      author: userId,
-      ...query,
-    })
+    const blogs = await Blog.find(filter)
       .select('-banner.publicId -__v')
       .populate('author', '-password -createdAt -updatedAt -__v')
       .limit(limit)

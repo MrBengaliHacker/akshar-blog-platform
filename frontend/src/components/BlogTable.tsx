@@ -148,13 +148,14 @@ const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
                 onClick={() => {
                   const formData = new FormData();
 
+                  formData.append('blogId', blog._id);
                   formData.append(
                     'status',
                     isPublished ? 'draft' : 'published',
                   );
 
                   fetcher.submit(formData, {
-                    action: `/admin/blogs/${blog.slug}/edit`,
+                    action: `${location.pathname.startsWith('/admin') ? '/admin' : '/dashboard'}/blogs/${blog.slug}/edit`,
                     method: 'put',
                     encType: 'multipart/form-data',
                   });

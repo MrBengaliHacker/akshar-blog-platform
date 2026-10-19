@@ -13,8 +13,8 @@ const getAllBlogs = async (req, res) => {
 
     const query = { status: 'published' };
 
-    // Admin can also see drafts
-    if (req.user?.role === 'admin') {
+    // Admin can also see drafts, only when the frontend asks for them
+    if (req.user?.role === 'admin' && req.query.includeDrafts === 'true') {
       delete query.status;
     }
 

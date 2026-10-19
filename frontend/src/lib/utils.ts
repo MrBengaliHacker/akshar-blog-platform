@@ -1,4 +1,4 @@
-import type { User } from "@/types";
+import type { User, ErrorResponse, ValidationError } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -20,4 +20,16 @@ export const getReadingTime = (content: string): number => {
   const AVG_READING_WPM = 150;
 
   return Math.ceil(content.split(' ').length / AVG_READING_WPM);
+};
+
+export const getErrorMessage = (
+  err?: ValidationError | ErrorResponse,
+): string => {
+  if (!err) return 'Something went wrong. Please try again later.';
+
+  if ('errors' in err) {
+    return Object.values(err.errors)[0]?.msg ?? 'Please check your input.';
+  }
+
+  return err.message;
 };

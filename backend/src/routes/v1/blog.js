@@ -8,6 +8,7 @@ const authorize = require('../../middlewares/authorize');
 const validationError = require('../../middlewares/validationError');
 const uploadBlogBanner = require('../../middlewares/uploadBlogBanner');
 const demoGuard = require('../../middlewares/demoGuard');
+const optionalAuthenticate = require('../../middlewares/optionalAuthenticate');
 
 // Controllers
 const createBlog = require('../../controllers/v1/blog/createBlog');
@@ -51,6 +52,7 @@ router.post(
 
 router.get(
   '/',
+  optionalAuthenticate,
   query('limit')
     .optional()
     .isInt({ min: 1, max: 50 })
@@ -65,6 +67,7 @@ router.get(
 
 router.get(
   '/user/:userId',
+  optionalAuthenticate,
   param('userId')
     .isMongoId()
     .withMessage('Invalid user ID'),
@@ -82,6 +85,7 @@ router.get(
 
 router.get(
   '/:slug',
+  optionalAuthenticate,
   param('slug')
     .notEmpty()
     .withMessage('Slug is required'),

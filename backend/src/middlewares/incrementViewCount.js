@@ -18,8 +18,8 @@ const incrementViewCount = async (req, res, next) => {
     }
 
     if (!viewedSlugs.includes(slug)) {
-      // Not viewed yet — increment and record
-      await Blog.updateOne({ slug }, { $inc: { viewsCount: 1 } });
+      // Not viewed yet — increment and record (published blogs only)
+      await Blog.updateOne({ slug, status: 'published' }, { $inc: { viewsCount: 1 } });
 
       viewedSlugs.push(slug);
 

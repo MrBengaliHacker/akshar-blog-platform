@@ -15,7 +15,7 @@ const allBlogLoader: LoaderFunction = async ({ request }) => {
 
   try {
     const response = await aksharApi .get('/blogs', {
-      params: { offset, limit }
+      params: { offset, limit, includeDrafts: true }
     });
     const data = response.data as PaginatedResponse<Blog, 'blogs'>;
     

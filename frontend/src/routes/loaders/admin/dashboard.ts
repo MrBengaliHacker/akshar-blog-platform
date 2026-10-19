@@ -23,7 +23,7 @@ const dashboardLoader: LoaderFunction = async () => {
   if (!accessToken) return redirect('/');
   try {
     const blogsResponse = await aksharApi.get('/blogs', {
-      params: { limit: 5 },
+      params: { limit: 5, includeDrafts: true },
     });
 
     const commentsResponse = await aksharApi.get('/comments', {
