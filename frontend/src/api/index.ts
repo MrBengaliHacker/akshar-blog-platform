@@ -2,6 +2,9 @@
 import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+// Custom hooks
+import { notifyUserChange } from '@/hooks/useUser';
+
 const baseURL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
 
 export const aksharApi = axios.create({
@@ -59,6 +62,7 @@ aksharApi.interceptors.response.use(
     } catch (refreshError) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
+      notifyUserChange();
 
       // Public page: continue as guest
       if (original.method === 'get') {

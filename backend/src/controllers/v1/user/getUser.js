@@ -14,12 +14,10 @@ const getUser = async (req, res) => {
       .lean()
       .exec();
 
-     if (!user) {
+    if (!user) {
       return res.status(404).json({
         code: 'NotFound',
-        message: config.NODE_ENV === 'production'
-        ? 'Internal server error'
-        : err.message,
+        message: 'User not found',
       });
     }
 

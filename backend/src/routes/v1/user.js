@@ -93,7 +93,7 @@ router.patch(
     .withMessage('Bio must be less than 200 characters'),
 
   body(['website', 'facebook', 'instagram', 'linkedin', 'x', 'youtube'])
-    .optional()
+    .optional({ values: 'falsy' })
     .isURL()
     .withMessage('Invalid URL')
     .isLength({ max: 100 })

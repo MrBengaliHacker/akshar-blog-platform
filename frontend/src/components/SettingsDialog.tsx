@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +6,8 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 // Custom Modules
-import { cn } from "@/lib/utils";
+import { cn, getErrorMessage } from "@/lib/utils";
+import { aksharApi } from "@/api";
 
 // Components
 import {
@@ -42,7 +43,7 @@ import { AtSignIcon, Loader2Icon, MailIcon } from "lucide-react";
 // Types
 
 import type { DialogProps } from "@radix-ui/react-dialog";
-import type { ActionResponse } from "@/types";
+import type { ActionResponse, ValidationError } from "@/types";
 
 
 // Profile Form Schema
@@ -56,40 +57,73 @@ const profileFormSchema = z.object({
   username: z.string().max(20, "Username must be less than 20 characters").optional(),
 });
 
+type ProfileFieldName = keyof z.infer<typeof profileFormSchema>;
+
 const ProfileSettingsForm = () => {
   const fetcher = useFetcher();
   const user = useUser();
-  const data = fetcher.data as ActionResponse;
+  const data = fetcher.data as ActionResponse | undefined;
 
   const loading = fetcher.state !== "idle";
-
-  useEffect(() => {
-    if (data && data.ok) {
-      toast.success("Profile has been updated successfully");
-    }
-  }, [data]);
-
-  const defaultValues = {
-    firstName: "",
-    lastName: "",
-    email: user?.email,
-    username: user?.username
-  };
 
   // React Hook Form Initial
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: user?.email,
+      username: user?.username,
+    },
   });
 
+  // Load the saved profile (first and last name are not kept in localStorage)
+  useEffect(() => {
+    aksharApi
+      .get("/users/current")
+      .then(({ data }) => {
+        form.reset({
+          firstName: data.user.firstName ?? "",
+          lastName: data.user.lastName ?? "",
+          email: data.user.email,
+          username: data.user.username,
+        });
+      })
+      .catch(() => {});
+  }, [form]);
+
+  // Handle server response
+  useEffect(() => {
+    if (!data) return;
+
+    if (data.ok) {
+      toast.success("Profile has been updated successfully");
+      return;
+    }
+
+    if (data.err?.code === "ValidationError") {
+      const validationErrors = data.err as ValidationError;
+
+      Object.values(validationErrors.errors).forEach((validationError) => {
+        form.setError(validationError.path as ProfileFieldName, {
+          type: "custom",
+          message: validationError.msg,
+        });
+      });
+      return;
+    }
+
+    toast.error(getErrorMessage(data.err));
+  }, [data, form]);
+
   // Handle form submission
-  const onSubmit = useCallback(async (values: z.infer<typeof profileFormSchema>) => {
-    await fetcher.submit(values, {
+  const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
+    fetcher.submit(values, {
       action: "/settings",
       method: "post",
       encType: "application/json",
     });
-  },[],);
+  };
 
   return (
     <Form {...form}>
@@ -227,6 +261,7 @@ const ProfileSettingsForm = () => {
 // Password Form Schema
 const passwordFormSchema = z
   .object({
+    currentPassword: z.string().min(1, "Enter your current password"),
     password: z.string().min(8, "Password must be at least 8 characters long"),
     confirm_password: z.string(),
   })
@@ -235,36 +270,60 @@ const passwordFormSchema = z
     path: ["confirm_password"],
   });
 
-  const PasswordSettingsForm = () => {
-  
+type PasswordFieldName = keyof z.infer<typeof passwordFormSchema>;
+
+const PasswordSettingsForm = () => {
   const fetcher = useFetcher();
-  const data = fetcher.data as ActionResponse;
+  const data = fetcher.data as ActionResponse | undefined;
 
   const loading = fetcher.state !== "idle";
-
-  useEffect(() => {
-    if (data && data.ok) {
-      toast.success("Password has been updated successfully");
-    }
-  }, [data]);
 
   // React Hook Form Initial
   const form = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
-      password: '',
-      confirm_password: ''
-    }
+      currentPassword: "",
+      password: "",
+      confirm_password: "",
+    },
   });
 
-  // Handle form submission
-  const onSubmit = useCallback(async (values: z.infer<typeof passwordFormSchema>) => {
-    await fetcher.submit(values, {
-      action: "/settings",
-      method: "post",
-      encType: "application/json",
-    });
-  },[],);
+  // Handle server response
+  useEffect(() => {
+    if (!data) return;
+
+    if (data.ok) {
+      toast.success("Password has been updated successfully");
+      form.reset();
+      return;
+    }
+
+    if (data.err?.code === "ValidationError") {
+      const validationErrors = data.err as ValidationError;
+
+      Object.values(validationErrors.errors).forEach((validationError) => {
+        form.setError(validationError.path as PasswordFieldName, {
+          type: "custom",
+          message: validationError.msg,
+        });
+      });
+      return;
+    }
+
+    toast.error(getErrorMessage(data.err));
+  }, [data, form]);
+
+  // Handle form submission (confirm_password is only for the form, not sent)
+  const onSubmit = (values: z.infer<typeof passwordFormSchema>) => {
+    fetcher.submit(
+      { currentPassword: values.currentPassword, password: values.password },
+      {
+        action: "/settings",
+        method: "post",
+        encType: "application/json",
+      },
+    );
+  };
 
   return (
     <Form {...form}>
@@ -278,6 +337,26 @@ const passwordFormSchema = z
 
           <Separator className="my-5" />
         </div>
+
+        <FormField
+          control={form.control}
+          name="currentPassword"
+          render={({ field }) => (
+            <FormItem className="grid gap-2 items-start lg:grid-cols-[1fr_2fr]">
+              <FormLabel >Current Password</FormLabel>
+
+              <div className="space-y-2">
+
+                <FormControl>
+                  <InputPassword placeholder="••••••••" {...field} />
+                </FormControl>
+
+                <FormMessage />
+                </div>
+            </FormItem>
+          )}
+        />
+        <Separator className="my-5" />
 
         <FormField
           control={form.control}
