@@ -7,6 +7,8 @@ const config = require('../../../config');
 // Models
 const Blog = require('../../../models/blog');
 const User = require('../../../models/user');
+const Comment = require('../../../models/comment');
+const Like = require('../../../models/like');
 
 const deleteBlog = async (req, res) => {
   try {
@@ -48,7 +50,12 @@ const deleteBlog = async (req, res) => {
       });
     }
 
-    await Blog.deleteOne({ _id: blogId });
+    // Delete the blog with its comments and likes
+    await Promise.all([
+      Comment.deleteMany({ blogId }),
+      Like.deleteMany({ blogId }),
+      Blog.deleteOne({ _id: blogId }),
+    ]);
 
     logger.info('Blog deleted successfully', { blogId, userId });
 

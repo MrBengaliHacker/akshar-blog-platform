@@ -1,10 +1,10 @@
 // Custom modules
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
+const deleteUserData = require('../../../lib/deleteUserData');
 
 // Models
 const User = require('../../../models/user');
-const Token = require('../../../models/token');
 
 const deleteUser = async (req, res) => {
   const { userId } = req.params;
@@ -19,11 +19,8 @@ const deleteUser = async (req, res) => {
       });
     }
 
-    // Delete user's refresh tokens from DB
-    await Token.deleteMany({ userId });
-
-    // Delete the user
-    await User.deleteOne({ _id: userId });
+    // Delete the user with blogs, comments, likes, images and sessions
+    await deleteUserData(userId);
 
     logger.info('User deleted by admin', { 
       deletedUser: user.email,

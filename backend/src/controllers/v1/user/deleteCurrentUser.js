@@ -1,20 +1,17 @@
-const { v2: cloudinary } = require('cloudinary');
-
 // Custom modules
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
+const deleteUserData = require('../../../lib/deleteUserData');
 const { clearCookieOptions } = require('../../../lib/cookies');
 
 // Models
 const User = require('../../../models/user');
-const Token = require('../../../models/token');
-const Blog = require('../../../models/blog');
 
 const deleteCurrentUser = async (req, res) => {
   const userId = req.userId;
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('_id');
 
     if (!user) {
       return res.status(404).json({
@@ -23,39 +20,8 @@ const deleteCurrentUser = async (req, res) => {
       });
     }
 
-    // Delete avatar from Cloudinary if exists
-    if (user.avatar) {
-      await cloudinary.uploader.destroy(`blog-api/avatars/${userId}`);
-      logger.info('Avatar deleted from Cloudinary', { userId });
-    }
-
-    // Find all user's blogs with banner publicIds
-    const blogs = await Blog.find({ author: userId })
-      .select('banner.publicId')
-      .lean()
-      .exec();
-
-    // Delete all blog banners from Cloudinary
-    const publicIds = blogs
-      .map((b) => b.banner?.publicId)
-      .filter(Boolean);
-
-    if (publicIds.length > 0) {
-      await cloudinary.api.delete_resources(publicIds);
-      logger.info('Multiple blog banners deleted from Cloudinary', {
-        publicIds,
-      });
-    }
-
-    // Delete all user's blogs
-    await Blog.deleteMany({ author: userId });
-    logger.info('Multiple blogs deleted', { userId });
-    
-    // Delete user's refresh tokens from DB
-    await Token.deleteMany({ userId });
-
-    // Delete user from DB
-    await User.deleteOne({ _id: userId });
+    // Delete the user with blogs, comments, likes, images and sessions
+    await deleteUserData(userId);
 
     // Clear the refresh token cookie
     res.clearCookie('refreshToken', clearCookieOptions);
