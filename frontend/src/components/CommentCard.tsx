@@ -99,6 +99,7 @@ export const CommentCard = ({
         <Avatar
           name={user ? getUsername(user) : "Deleted User"}
           email={user?.email}
+          src={user?.avatar || undefined}
           size="40"
           round
         />

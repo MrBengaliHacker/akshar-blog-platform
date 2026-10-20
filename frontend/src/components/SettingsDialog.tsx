@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import Avatar from "react-avatar";
 
 // Custom Modules
 import { cn, getErrorMessage } from "@/lib/utils";
@@ -25,6 +26,17 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { InputPassword } from "@/components/InputPassword";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Form,
   FormControl,
   FormField,
@@ -34,16 +46,15 @@ import {
 } from "@/components/ui/form";
 
 // Custom Hooks
-import { useUser } from '@/hooks/useUser';
+import { useUser, notifyUserChange } from '@/hooks/useUser';
 
 // Assets
 import { AtSignIcon, Loader2Icon, MailIcon } from "lucide-react";
 
-
 // Types
-
+import type { AxiosError } from "axios";
 import type { DialogProps } from "@radix-ui/react-dialog";
-import type { ActionResponse, ValidationError } from "@/types";
+import type { ActionResponse, ErrorResponse, ValidationError } from "@/types";
 
 
 // Profile Form Schema
@@ -64,7 +75,11 @@ const ProfileSettingsForm = () => {
   const user = useUser();
   const data = fetcher.data as ActionResponse | undefined;
 
+  const avatarFetcher = useFetcher();
+  const avatarData = avatarFetcher.data as ActionResponse | undefined;
+
   const loading = fetcher.state !== "idle";
+  const avatarLoading = avatarFetcher.state !== "idle";
 
   // React Hook Form Initial
   const form = useForm<z.infer<typeof profileFormSchema>>({
@@ -116,6 +131,39 @@ const ProfileSettingsForm = () => {
     toast.error(getErrorMessage(data.err));
   }, [data, form]);
 
+  // Handle avatar upload response
+  useEffect(() => {
+    if (!avatarData) return;
+
+    if (avatarData.ok) {
+      toast.success("Photo has been updated successfully");
+    } else {
+      toast.error(getErrorMessage(avatarData.err));
+    }
+  }, [avatarData]);
+
+  // Upload the selected photo
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = ""; // allows choosing the same file again
+
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      toast.error("Photo must be less than 1MB");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("avatar_image", file);
+
+    avatarFetcher.submit(formData, {
+      action: "/settings",
+      method: "post",
+      encType: "multipart/form-data",
+    });
+  };
+
   // Handle form submission
   const onSubmit = (values: z.infer<typeof profileFormSchema>) => {
     fetcher.submit(values, {
@@ -137,6 +185,48 @@ const ProfileSettingsForm = () => {
 
           <Separator className="my-5" />
         </div>
+
+        <div className="grid gap-4 items-start lg:grid-cols-[1fr_2fr]">
+          <div className="text-sm leading-none font-medium">Photo</div>
+
+          <div className="flex items-center gap-4">
+            <Avatar
+              name={user?.username}
+              email={user?.email}
+              src={user?.avatar || undefined}
+              size="64"
+              round
+            />
+
+            <div className="space-y-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={avatarLoading}
+                asChild
+              >
+                <label className="cursor-pointer">
+                  {avatarLoading && <Loader2Icon className="animate-spin" />}
+                  Change photo
+
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    className="sr-only"
+                    onChange={handleAvatarChange}
+                  />
+                </label>
+              </Button>
+
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG or WEBP. Max 1MB.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Separator className="my-5" />
 
         <div className="grid gap-4 items-start lg:grid-cols-[1fr_2fr]">
           <div
@@ -418,6 +508,72 @@ const PasswordSettingsForm = () => {
   )
 };
 
+const DeleteAccountSection = () => {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+
+    try {
+      await aksharApi.delete("/users/current");
+
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      notifyUserChange();
+
+      window.location.href = "/";
+    } catch (err) {
+      setDeleting(false);
+      toast.error(
+        getErrorMessage((err as AxiosError<ErrorResponse>).response?.data),
+      );
+    }
+  };
+
+  return (
+    <div className="mt-8 rounded-lg border border-destructive/30 p-4">
+      <h3 className="font-semibold text-lg">Delete account</h3>
+
+      <p className="text-sm text-muted-foreground">
+        Permanently delete your account and all your blogs. This cannot be undone.
+      </p>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" className="mt-4">
+            Delete my account
+          </Button>
+        </AlertDialogTrigger>
+
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your account and all your blogs will be deleted permanently.
+              Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              disabled={deleting}
+              onClick={(event) => {
+                event.preventDefault(); // keep the dialog open until the request ends
+                handleDelete();
+              }}
+            >
+              {deleting && <Loader2Icon className="animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
 export const SettingsDialog = ({
   children,
   ...props
@@ -442,6 +598,7 @@ export const SettingsDialog = ({
 
           <TabsContent value="profile">
             <ProfileSettingsForm />
+            <DeleteAccountSection />
           </TabsContent>
 
           <TabsContent value="password">

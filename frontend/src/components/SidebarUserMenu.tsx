@@ -41,7 +41,9 @@ export const SidebarUserMenu = () => {
               >
                 <Avatar 
                 name={user.username} 
-                email={user.email} size='32' 
+                email={user.email} 
+                src={user.avatar || undefined}
+                size='32' 
                 className='rounded-lg' 
                 />
                 <div className='grid flex-1 text-left text-sm leading-tight'>
@@ -61,7 +63,12 @@ export const SidebarUserMenu = () => {
             >
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar name={user.username} email={user.email} size='32' className='rounded-lg' />
+                  <Avatar 
+                  name={user.username} 
+                  email={user.email} 
+                  src={user.avatar || undefined}
+                  size='32' 
+                  className='rounded-lg' />
 
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <div className="truncate font-medium">{user.username}</div>

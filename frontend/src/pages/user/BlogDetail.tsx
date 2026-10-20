@@ -175,7 +175,12 @@ export const BlogDetail = () => {
 
         <div className='flex items-center gap-3 my-8'>
           <div className='flex items-center gap-3'>
-            <Avatar name={getUsername(blog.author)} email={blog.author.email} size='32' round />
+            <Avatar 
+            name={getUsername(blog.author)} 
+            email={blog.author.email} 
+            src={blog.author.avatar || undefined} 
+            size='32' 
+            round />
             <span>{getUsername(blog.author)}</span>
           </div>
 

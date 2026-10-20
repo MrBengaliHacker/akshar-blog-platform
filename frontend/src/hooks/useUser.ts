@@ -3,7 +3,9 @@ import { useMemo, useSyncExternalStore } from 'react';
 // Types
 import type { User } from '@/types';
 
-export type UserResponse = Pick<User, '_id' | 'username' | 'email' | 'role'>;
+export type UserResponse = Pick<User, '_id' | 'username' | 'email' | 'role'> & {
+  avatar?: string;
+};
 
 // Components that use useUser() re-render when the saved user changes
 const listeners = new Set<() => void>();

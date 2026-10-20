@@ -10,7 +10,9 @@ import type { ActionFunction } from "react-router";
 import { AxiosError } from "axios";
 
 const settingsAction: ActionFunction = async ({ request }) => {
-  const data = await request.json();
+  // Avatar upload sends a file (FormData), the other forms send JSON
+  const isFile = (request.headers.get("Content-Type") ?? "").includes("multipart/form-data");
+  const data = isFile ? await request.formData() : await request.json();
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -22,9 +24,9 @@ const settingsAction: ActionFunction = async ({ request }) => {
     const responseData = response.data;
 
     // Keep the same shape as login: only what the app needs
-    const { _id, username, email, role } = responseData.user;
+    const { _id, username, email, role, avatar } = responseData.user;
 
-    localStorage.setItem('user', JSON.stringify({ _id, username, email, role }));
+    localStorage.setItem('user', JSON.stringify({ _id, username, email, role, avatar }));
     notifyUserChange();
 
     return {

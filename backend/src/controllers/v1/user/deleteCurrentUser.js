@@ -25,7 +25,7 @@ const deleteCurrentUser = async (req, res) => {
 
     // Delete avatar from Cloudinary if exists
     if (user.avatar) {
-      await cloudinary.uploader.destroy(`avatars/${userId}`);
+      await cloudinary.uploader.destroy(`blog-api/avatars/${userId}`);
       logger.info('Avatar deleted from Cloudinary', { userId });
     }
 

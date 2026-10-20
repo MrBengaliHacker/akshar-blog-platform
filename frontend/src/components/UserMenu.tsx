@@ -36,6 +36,7 @@ export const UserMenu = () => {
             <Avatar
               name={user.username}
               email={user.email}
+              src={user.avatar || undefined}
               size='28'
               className='rounded-sm'
             />
@@ -51,6 +52,7 @@ export const UserMenu = () => {
               <Avatar
                 name={user.username}
                 email={user.email}
+                src={user.avatar || undefined}
                 size='32'
                 className='rounded-lg'
               />

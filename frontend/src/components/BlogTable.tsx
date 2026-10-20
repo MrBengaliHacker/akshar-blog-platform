@@ -266,6 +266,7 @@ export const columns: ColumnDef<Blog>[] = [
           <Avatar
             name={getUsername(author)}
             email={author.email}
+            src={author.avatar || undefined}
             size='24'
             className='rounded-md'
           />

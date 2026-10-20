@@ -59,6 +59,7 @@ const register = async (req, res) => {
         username: newUser.username,
         email: newUser.email,
         role: newUser.role,
+        avatar: newUser.avatar,
       },
       accessToken,
     });

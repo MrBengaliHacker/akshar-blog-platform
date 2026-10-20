@@ -25,6 +25,11 @@ const getPublicProfile = require('../../controllers/v1/user/getPublicProfile');
 // Models
 const User = require('../../models/user');
 
+// Demo admin cannot change the password, because everyone shares this account
+const demoPasswordGuard = (req, res, next) => {
+  if (req.body?.password) return demoGuard(req, res, next);
+  return next();
+};
 
 router.get(
   '/current',
@@ -37,6 +42,7 @@ router.patch(
   '/current',
   authenticate,
   authorize(['admin', 'user']),
+  demoPasswordGuard,
   upload.single('avatar_image'), // ← multer reads file
   uploadAvatar,                  // ← uploads to Cloudinary
 
@@ -107,6 +113,7 @@ router.delete(
   '/current',
   authenticate,
   authorize(['admin', 'user']),
+  demoGuard,
   deleteCurrentUser,
 );
 
