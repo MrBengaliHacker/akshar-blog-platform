@@ -22,7 +22,9 @@ router.post(
   body('content')
     .trim()
     .notEmpty()
-    .withMessage('Content is required'),
+    .withMessage('Content is required')
+    .isLength({ max: 1000 })
+    .withMessage('Comment must be less than 1000 characters'),
   validationError,
   commentBlog,
 );

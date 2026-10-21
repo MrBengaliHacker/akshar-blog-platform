@@ -11,42 +11,22 @@ const unlikeBlog = async (req, res) => {
   const userId = req.userId; // ← from token not body
 
   try {
-    const existingLike = await Like.findOne({ userId, blogId })
-      .lean()
-      .exec();
+    const deletedLike = await Like.findOneAndDelete({ userId, blogId });
 
-    if (!existingLike) {
+    if (!deletedLike) {
       return res.status(404).json({
         code: 'NotFound',
         message: 'Like not found',
       });
     }
 
-    await Like.deleteOne({ _id: existingLike._id });
+    // Atomic decrement, and never below 0
+    await Blog.updateOne(
+      { _id: blogId, likesCount: { $gt: 0 } },
+      { $inc: { likesCount: -1 } },
+    );
 
-    const blog = await Blog.findById(blogId)
-      .select('likesCount')
-      .exec();
-
-    if (!blog) {
-      return res.status(404).json({
-        code: 'NotFound',
-        message: 'Blog not found',
-      });
-    }
-
-    // Prevent negative likes count
-    if (blog.likesCount > 0) {
-      blog.likesCount--;
-    }
-
-    await blog.save();
-
-    logger.info('Blog unliked successfully', {
-      userId,
-      blogId: blog._id,
-      likesCount: blog.likesCount,
-    });
+    logger.info('Blog unliked successfully', { userId, blogId });
 
     return res.sendStatus(204);
 

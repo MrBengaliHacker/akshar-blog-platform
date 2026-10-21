@@ -1,6 +1,3 @@
-const { JSDOM } = require('jsdom');
-const DOMPurify = require('dompurify');
-
 // Custom modules
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
@@ -9,38 +6,31 @@ const config = require('../../../config');
 const Blog = require('../../../models/blog');
 const Comment = require('../../../models/comment');
 
-// Setup DOMPurify
-const window = new JSDOM('').window;
-const purify = DOMPurify(window);
-
 const commentBlog = async (req, res) => {
+  // Comments are plain text (already trimmed by the route). The frontend shows them as text, 
+  // so React escapes them. Never show comments as HTML.
   const { content } = req.body;
   const { blogId } = req.params;
   const userId = req.userId;
 
   try {
-    const blog = await Blog.findById(blogId)
-      .select('_id commentsCount')
-      .exec();
+    const blogExists = await Blog.exists({ _id: blogId });
 
-    if (!blog) {
+    if (!blogExists) {
       return res.status(404).json({
         code: 'NotFound',
         message: 'Blog not found',
       });
     }
 
-    // Sanitize comment content
-    const cleanContent = purify.sanitize(content);
-
     const newComment = await Comment.create({
       blogId,
-      content: cleanContent,
+      content,
       userId,
     });
 
-    blog.commentsCount++;
-    await blog.save();
+    // Atomic increment
+    await Blog.updateOne({ _id: blogId }, { $inc: { commentsCount: 1 } });
 
     const commentObject = await Comment.findById(newComment._id)
       .select('-__v')
@@ -53,7 +43,6 @@ const commentBlog = async (req, res) => {
       commentId: newComment._id,
       blogId,
       userId,
-      commentsCount: blog.commentsCount,
     });
 
     return res.status(201).json({

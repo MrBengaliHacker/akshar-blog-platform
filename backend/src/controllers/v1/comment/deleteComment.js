@@ -4,7 +4,6 @@ const config = require('../../../config');
 
 // Models
 const Comment = require('../../../models/comment');
-const User = require('../../../models/user');
 const Blog = require('../../../models/blog');
 
 const deleteComment = async (req, res) => {
@@ -14,6 +13,7 @@ const deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findById(commentId)
       .select('userId blogId')
+      .lean()
       .exec();
 
     if (!comment) {
@@ -23,30 +23,8 @@ const deleteComment = async (req, res) => {
       });
     }
 
-    const user = await User.findById(currentUserId)
-      .select('role')
-      .exec();
-
-    if (!user) {
-      return res.status(404).json({
-        code: 'NotFound',
-        message: 'User not found',
-      });
-    }
-
-    const blog = await Blog.findById(comment.blogId)
-      .select('commentsCount')
-      .exec();
-
-    if (!blog) {
-      return res.status(404).json({
-        code: 'NotFound',
-        message: 'Blog not found',
-      });
-    }
-
-    // Only comment owner or admin can delete
-    if (comment.userId.toString() !== currentUserId && user.role !== 'admin') {
+    // Only comment owner or admin can delete (req.user comes from authenticate)
+    if (comment.userId.toString() !== currentUserId && req.user?.role !== 'admin') {
       logger.warn('Unauthorized comment delete attempt', {
         userId: currentUserId,
         commentId,
@@ -59,17 +37,15 @@ const deleteComment = async (req, res) => {
 
     await Comment.deleteOne({ _id: commentId });
 
-    // Prevent negative comments count
-    if (blog.commentsCount > 0) {
-      blog.commentsCount--;
-    }
-
-    await blog.save();
+    // Atomic decrement, and never below 0
+    await Blog.updateOne(
+      { _id: comment.blogId, commentsCount: { $gt: 0 } },
+      { $inc: { commentsCount: -1 } },
+    );
 
     logger.info('Comment deleted successfully', {
       commentId,
-      blogId: blog._id,
-      commentsCount: blog.commentsCount,
+      blogId: comment.blogId,
     });
 
     return res.sendStatus(204);

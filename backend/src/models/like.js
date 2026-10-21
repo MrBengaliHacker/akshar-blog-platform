@@ -21,4 +21,12 @@ const likeSchema = new mongoose.Schema(
   }
 );
 
+// One like per user and blog. Comment likes (no blogId) are not affected.
+likeSchema.index(
+  { blogId: 1, userId: 1 },
+  { unique: true, partialFilterExpression: { blogId: { $exists: true } } },
+);
+
+module.exports = mongoose.model('Like', likeSchema);
+
 module.exports = mongoose.model('Like', likeSchema);
