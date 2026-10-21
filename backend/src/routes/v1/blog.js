@@ -19,6 +19,10 @@ const updateBlog = require('../../controllers/v1/blog/updateBlog');
 const deleteBlog = require('../../controllers/v1/blog/deleteBlog');
 const incrementViewCount = require('../../middlewares/incrementViewCount');
 
+// Tiptap sends <p></p> for an empty editor, so check the text inside the tags
+const hasText = (html) =>
+  html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().length > 0;
+
 // Multer - store file in memory buffer (max 2MB)
 const upload = multer({ limits: { fileSize: 2 * 1024 * 1024 } });
 
@@ -38,6 +42,8 @@ router.post(
   body('content')
     .trim()
     .notEmpty()
+    .withMessage('Content is required')
+    .custom(hasText)
     .withMessage('Content is required'),
 
   body('status')
@@ -108,7 +114,9 @@ router.patch(
     .isLength({ max: 180 })
     .withMessage('Title must be less than 180 characters'),
   body('content')
-    .optional(),
+    .optional()
+    .custom(hasText)
+    .withMessage('Content is required'),
   body('status')
     .optional()
     .isIn(['draft', 'published'])

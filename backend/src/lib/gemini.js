@@ -1,12 +1,19 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const config = require('../config');
 
-if (!config.GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY is missing in environment variables');
-}
+let model = null;
 
-const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+// The model is created only when it is first needed,
+// so the server can start without a Gemini key (AI is optional)
+const getModel = () => {
+  if (!config.GEMINI_API_KEY) return null;
 
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  if (!model) {
+    const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+    model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  }
 
-module.exports = model;
+  return model;
+};
+
+module.exports = getModel;

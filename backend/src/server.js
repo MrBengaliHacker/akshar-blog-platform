@@ -22,6 +22,9 @@ if (config.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
+// The AI route gets a bigger limit (long prompts), all other routes keep 10kb
+app.use('/api/v1/ai', express.json({ limit: '50kb' }));
+
 // Request size limit — prevents large payload attacks
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));

@@ -22,6 +22,9 @@ const config = {
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  AI_DAILY_LIMIT: parseInt(process.env.AI_DAILY_LIMIT) || 3,
+  AI_ADMIN_DAILY_LIMIT: parseInt(process.env.AI_ADMIN_DAILY_LIMIT) || 10,
+  AI_GLOBAL_DAILY_LIMIT: parseInt(process.env.AI_GLOBAL_DAILY_LIMIT) || 50,
 };
 
 const required = ['MONGO_URI', 'JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];

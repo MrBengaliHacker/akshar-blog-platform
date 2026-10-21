@@ -1,6 +1,7 @@
 const logger = require('../../../lib/logger');
 const config = require('../../../config');
-const model = require('../../../lib/gemini');
+const getModel = require('../../../lib/gemini');
+const { consumeAiUse, refundAiUse } = require('../../../lib/aiUsage');
 
 const ACTIONS = {
   improve: (text) =>
@@ -34,6 +35,9 @@ const ACTIONS = {
 const aiAssist = async (req, res) => {
   const { prompt, action } = req.body;
 
+  // true after we counted this request, so we can give it back if Gemini fails
+  let counted = false;
+
   try {
     const buildPrompt = ACTIONS[action];
 
@@ -44,6 +48,36 @@ const aiAssist = async (req, res) => {
       });
     }
 
+    // AI is optional: without a Gemini key the rest of the app still works
+    const model = getModel();
+
+    if (!model) {
+      return res.status(503).json({
+        code: 'ServiceUnavailable',
+        message: 'AI assistant is not available right now',
+      });
+    }
+
+    // Daily limit per user, and one for all users together (protects our quota)
+    const usage = await consumeAiUse(req.userId, req.user.role);
+
+    if (!usage.allowed) {
+      return res.status(429).json({
+        code: 'TooManyRequests',
+        message:
+          usage.reason === 'user'
+            ? `You used all ${usage.limit} AI requests for today. Please try again tomorrow.`
+            : 'The AI assistant is very busy today. Please try again tomorrow.',
+        usage: {
+          used: usage.used,
+          limit: usage.limit,
+          remaining: usage.remaining,
+        },
+      });
+    }
+
+    counted = true;
+
     const fullPrompt = buildPrompt(prompt);
     const result = await model.generateContent(fullPrompt);
     const text = result.response.text();
@@ -53,10 +87,40 @@ const aiAssist = async (req, res) => {
       userId: req.userId,
     });
 
-    return res.status(200).json({ text });
+    return res.status(200).json({
+      text,
+      usage: {
+        used: usage.used,
+        limit: usage.limit,
+        remaining: usage.remaining,
+      },
+    });
 
   } catch (err) {
     logger.error('Error during AI assist', err);
+
+    // A failed request must not use up the user's daily limit
+    if (counted) {
+      await refundAiUse(req.userId).catch((refundErr) =>
+        logger.error('Error while refunding AI use', refundErr),
+      );
+    }
+
+    // Gemini free quota reached
+    if (err.status === 429) {
+      return res.status(429).json({
+        code: 'TooManyRequests',
+        message: 'AI is busy right now, please try again in a minute',
+      });
+    }
+
+    // Gemini refused to answer (safety filter)
+    if (/blocked/i.test(err.message)) {
+      return res.status(400).json({
+        code: 'BadRequest',
+        message: 'The AI could not answer this request, try changing your text',
+      });
+    }
 
     return res.status(500).json({
       code: 'ServerError',

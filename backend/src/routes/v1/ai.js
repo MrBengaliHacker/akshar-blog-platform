@@ -6,13 +6,18 @@ const authenticate = require('../../middlewares/authenticate');
 const authorize = require('../../middlewares/authorize');
 const validationError = require('../../middlewares/validationError');
 
+// Custom modules
+const { aiLimiter } = require('../../lib/rateLimit');
+
 // Controllers
 const aiAssist = require('../../controllers/v1/ai/aiAssist');
+const getAiUsage = require('../../controllers/v1/ai/getAiUsage');
 
 router.post(
   '/assist',
   authenticate,
   authorize(['admin', 'user']),
+  aiLimiter,
 
   body('prompt')
     .trim()
@@ -40,6 +45,14 @@ router.post(
 
   validationError,
   aiAssist,
+);
+
+// How many AI requests the user has left today
+router.get(
+  '/usage',
+  authenticate,
+  authorize(['admin', 'user']),
+  getAiUsage,
 );
 
 module.exports = router;
