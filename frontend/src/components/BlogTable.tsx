@@ -8,10 +8,11 @@ import { motion } from 'motion/react';
 import { Editor } from '@tiptap/react';
 import { formatDistanceToNowStrict } from 'date-fns';
 import StarterKit from '@tiptap/starter-kit';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { toast } from 'sonner';
 
 // Custom modules
-import { cn, getUsername } from '@/lib/utils';
+import { cn, getUsername, getErrorMessage } from '@/lib/utils';
 
 // Components
 import {
@@ -57,7 +58,7 @@ import { MoreHorizontalIcon, Loader2Icon } from 'lucide-react';
 
 // Types
 import type { ColumnDef } from '@tanstack/react-table';
-import type { Blog, User } from '@/types';
+import type { ActionResponse, Blog, User } from '@/types';
 import type { Variants } from 'motion/react';
 
 interface BlogTableProps<TData, TValue> {
@@ -86,6 +87,30 @@ const tableRowVariant: Variants = {
 
 const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
   const fetcher = useFetcher();
+
+    const actionData = fetcher.data as ActionResponse | undefined;
+
+  // Remember what the user asked for, to show the right message
+  const lastAction = useRef<'publish' | 'unpublish' | 'delete'>('publish');
+
+  // Show the result of publish, unpublish and delete
+  useEffect(() => {
+    if (!actionData) return;
+
+    if (actionData.ok) {
+      const messages = {
+        publish: 'Blog published',
+        unpublish: 'Blog moved to drafts',
+        delete: 'Blog deleted',
+      };
+
+      toast.success(messages[lastAction.current]);
+    } else {
+      toast.error('Action failed', {
+        description: getErrorMessage(actionData.err),
+      });
+    }
+  }, [actionData]);
 
   const isPublished = useMemo(() => blog.status === 'published', [blog.status]);
 
@@ -147,7 +172,7 @@ const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
               <AlertDialogAction
                 onClick={() => {
                   const formData = new FormData();
-
+                  lastAction.current = isPublished ? 'unpublish' : 'publish';
                   formData.append('blogId', blog._id);
                   formData.append(
                     'status',
@@ -195,6 +220,7 @@ const BlogActionDropdown = ({ blog }: { blog: Blog }) => {
 
               <AlertDialogAction
                 onClick={() => {
+                  lastAction.current = 'delete';
                   const data = { blogId: blog._id };
                   fetcher.submit(data, {
                     action: '/admin/blogs',

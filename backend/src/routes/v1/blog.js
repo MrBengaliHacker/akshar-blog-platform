@@ -30,6 +30,7 @@ router.post(
   '/',
   authenticate,
   authorize(['admin', 'user']),
+  demoGuard,
   upload.single('banner_image'),
 
   body('title')
@@ -104,6 +105,7 @@ router.patch(
   '/:blogId',
   authenticate,
   authorize(['admin', 'user']),
+  demoGuard,
   param('blogId')
     .isMongoId()
     .withMessage('Invalid blog ID'),

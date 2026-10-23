@@ -5,6 +5,7 @@ const { body, param, query } = require('express-validator');
 const authenticate = require('../../middlewares/authenticate');
 const authorize = require('../../middlewares/authorize');
 const validationError = require('../../middlewares/validationError');
+const demoGuard = require('../../middlewares/demoGuard');
 
 // Controllers
 const commentBlog = require('../../controllers/v1/comment/commentBlog');
@@ -61,6 +62,7 @@ router.delete(
   '/:commentId',
   authenticate,
   authorize(['admin', 'user']),
+  demoGuard,
   param('commentId')
     .isMongoId()
     .withMessage('Invalid comment ID'),
