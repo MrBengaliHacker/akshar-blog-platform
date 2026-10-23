@@ -5,28 +5,28 @@ const { consumeAiUse, refundAiUse } = require('../../../lib/aiUsage');
 
 const ACTIONS = {
   improve: (text) =>
-    `You are a professional blog editor. Improve the writing quality, fix grammar, and enhance clarity of this text while keeping the same meaning and voice:\n\n${text}\n\nReturn only the improved text, no explanations.`,
+    `You are a professional blog editor. Improve the writing quality, fix grammar, and enhance clarity of this text while keeping the same meaning and voice:\n\n${text}\n\nReturn only the improved text, no explanations. Use plain text only, without markdown formatting.`,
 
   continue: (text) =>
-    `You are a blog writer. Continue writing this text naturally and engagingly. Match the existing tone and style:\n\n${text}\n\nReturn only the continuation, no explanations.`,
+    `You are a blog writer. Continue writing this text naturally and engagingly. Match the existing tone and style:\n\n${text}\n\nReturn only the continuation, no explanations. Use plain text only, without markdown formatting.`,
 
   summarize: (text) =>
-    `Summarize this blog content in 2-3 concise sentences:\n\n${text}\n\nReturn only the summary, no explanations.`,
+    `Summarize this blog content in 2-3 concise sentences:\n\n${text}\n\nReturn only the summary, no explanations. Use plain text only, without markdown formatting.`,
 
   title: (text) =>
     `Generate 5 catchy, SEO-friendly blog title suggestions for this content. Make them engaging and clickable:\n\n${text}\n\nReturn only the titles as a numbered list.`,
 
   expand: (text) =>
-    `You are a blog writer. Expand this text with more details, examples, and explanations while keeping the same tone:\n\n${text}\n\nReturn only the expanded text, no explanations.`,
+    `You are a blog writer. Expand this text with more details, examples, and explanations while keeping the same tone:\n\n${text}\n\nReturn only the expanded text, no explanations. Use plain text only, without markdown formatting.`,
 
   tone_formal: (text) =>
-    `Rewrite this text in a formal, professional tone:\n\n${text}\n\nReturn only the rewritten text, no explanations.`,
+    `Rewrite this text in a formal, professional tone:\n\n${text}\n\nReturn only the rewritten text, no explanations. Use plain text only, without markdown formatting.`,
 
   tone_casual: (text) =>
-    `Rewrite this text in a friendly, casual conversational tone:\n\n${text}\n\nReturn only the rewritten text, no explanations.`,
+    `Rewrite this text in a friendly, casual conversational tone:\n\n${text}\n\nReturn only the rewritten text, no explanations. Use plain text only, without markdown formatting.`,
 
   fullBlog: (text) =>
-    `You are an expert blog writer. Write a complete, well-structured blog post about this topic:\n\n${text}\n\nInclude: engaging introduction, multiple sections with headings, practical examples, and a conclusion. Make it informative and engaging. Return only the blog content in markdown format.`,
+    `You are an expert blog writer. Write a complete, well-structured blog post about this topic:\n\n${text}\n\nInclude: engaging introduction, multiple sections with headings, practical examples, and a conclusion. Make it informative and engaging. Return ONLY valid HTML using <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong> and <em>. Do not use <html>, <body>, markdown or code fences.`,
 
   freePrompt: (text) =>
     `You are a helpful AI writing assistant for a blog platform. ${text}`,

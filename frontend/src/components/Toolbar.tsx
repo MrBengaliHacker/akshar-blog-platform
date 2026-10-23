@@ -21,6 +21,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { AIAssistMenu } from "@/components/AIAssistMenu";
 
 // Assets
 import {
@@ -373,6 +374,8 @@ export const Toolbar = ({
           <div className="opacity-70">Ctrl+E</div>
         </TooltipContent>
       </Tooltip>
+
+      <AIAssistMenu />
     </div>
   );
 };
