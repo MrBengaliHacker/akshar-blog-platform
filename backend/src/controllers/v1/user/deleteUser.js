@@ -10,6 +10,14 @@ const deleteUser = async (req, res) => {
   const { userId } = req.params;
 
   try {
+    // An admin deletes their own account from Settings, not from here
+    if (userId === req.userId) {
+      return res.status(400).json({
+        code: 'BadRequest',
+        message: 'Use Settings to delete your own account',
+      });
+    }
+    
     const user = await User.findById(userId);
 
     if (!user) {

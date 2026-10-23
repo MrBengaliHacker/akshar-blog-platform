@@ -48,6 +48,21 @@ aksharApi.interceptors.response.use(
       | (InternalAxiosRequestConfig & { _retry?: boolean })
       | undefined;
 
+    // A banned user is logged out (login and register show their own message)
+    const isBanned =
+      error.response?.status === 403 &&
+      error.response.data?.message?.includes('banned') &&
+      !original?.url?.startsWith('/auth/');
+
+    if (isBanned) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      notifyUserChange();
+
+      window.location.href = '/login';
+      throw error;
+    }
+
     const isExpired =
       error.response?.status === 401 &&
       error.response.data?.message?.includes('token expired');

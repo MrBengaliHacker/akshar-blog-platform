@@ -33,8 +33,13 @@ export const Users = () => {
     fetcher.submit(searchParams, { method: 'get' });
   }, []);
 
+  // Add only users that are not in the list yet (the loader runs again after delete or ban)
   useEffect(() => {
-    setAllUsers((prevUsers) => [...prevUsers, ...users]);
+    setAllUsers((prevUsers) => {
+      const ids = new Set(prevUsers.map((user) => user._id));
+
+      return [...prevUsers, ...users.filter((user) => !ids.has(user._id))];
+    });
   }, [users]);
 
   const hasMoreUsers = offset + limit < total;
@@ -49,10 +54,12 @@ export const Users = () => {
 
       <div className='grid lg:grid-cols-2 xl:grid-cols-3 gap-3'>
         {allUsers.map(
-          ({ _id, username, firstName, lastName, email, role, createdAt }) => (
+          ({ _id, username, firstName, lastName, email, avatar, isBanned, role, createdAt }) => (
               <UserCard
                 key={_id}
                 userId={_id}
+                avatar={avatar}
+                isBanned={isBanned}
                 username={username}
                 firstName={firstName}
                 lastName={lastName}

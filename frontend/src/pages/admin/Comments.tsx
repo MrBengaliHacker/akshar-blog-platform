@@ -30,8 +30,16 @@ export const Comments = () => {
     fetcher.submit(searchParams.toString());
   }, []);
 
+  // Add only comments that are not in the list yet (the loader runs again after a delete)
   useEffect(() => {
-    setAllComments((prevComments) => [...prevComments, ...comments]);
+    setAllComments((prevComments) => {
+      const ids = new Set(prevComments.map((comment) => comment._id));
+
+      return [
+        ...prevComments,
+        ...comments.filter((comment) => !ids.has(comment._id)),
+      ];
+    });
   }, [comments]);
 
   const hasMoreComments = offset + limit < total;

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { toast } from "sonner";
 import { useFetcher } from "react-router";
@@ -26,16 +27,20 @@ import {
 } from "@/components/ui/tooltip";
 
 // Custom modules
-import { getUsername } from "@/lib/utils";
+import { getUsername, getErrorMessage } from "@/lib/utils";
 
 // Assets
-import { Trash2Icon } from "lucide-react";
+import { Trash2Icon, BanIcon, ShieldCheckIcon } from "lucide-react";
 import type { UserResponse } from "@/hooks/useUser";
 
 // Types
+import type { ActionResponse } from "@/types";
+
 type Props = {
   userId: string;
   email: string;
+  avatar?: string;
+  isBanned?: boolean;
   firstName?: string;
   lastName?: string;
   username: string;
@@ -48,6 +53,8 @@ type Props = {
 export const UserCard = ({
   userId,
   email,
+  avatar,
+  isBanned,
   firstName,
   lastName,
   username,
@@ -56,14 +63,57 @@ export const UserCard = ({
   loggedInUser,
   onUserDeleteSuccess,
 }: Props) => {
-  const fetcher = useFetcher();
-  
+  const deleteFetcher = useFetcher();
+  const banFetcher = useFetcher();
+
+  const deleteData = deleteFetcher.data as ActionResponse | undefined;
+  const banData = banFetcher.data as
+    | ActionResponse<{ message: string; isBanned: boolean }>
+    | undefined;
+
+  // After a ban or unban we use the answer from the server
+  const banned = banData?.ok && banData.data ? banData.data.isBanned : !!isBanned;
+  const isBanning = banFetcher.state !== "idle";
+
+  // Handle delete response
+  useEffect(() => {
+    if (!deleteData) return;
+
+    if (deleteData.ok) {
+      toast.success("User Account Deleted", {
+        description:
+          "The user account has been permanently removed from the system.",
+      });
+      onUserDeleteSuccess?.();
+    } else {
+      toast.error("Failed to Delete User", {
+        description: getErrorMessage(deleteData.err),
+      });
+    }
+  }, [deleteData]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle ban and unban response
+  useEffect(() => {
+    if (!banData) return;
+
+    if (banData.ok && banData.data) {
+      toast.success(banData.data.message);
+    } else {
+      toast.error("Failed to Update User", {
+        description: getErrorMessage(banData.err),
+      });
+    }
+  }, [banData]);
+
+  const isOtherUser = loggedInUser?.username !== username;
+
   return (
     <Card className="group py-4">
       <CardContent className="grid grid-cols-[max-content_minmax(0,1fr)_max-content] gap-4 px-4">
         <Avatar
           size="40"
           email={email}
+          src={avatar || undefined}
           name={getUsername({ firstName, lastName, username })}
           className="rounded-lg"
         />
@@ -82,6 +132,8 @@ export const UserCard = ({
                 {role}
               </Badge>
             )}
+
+            {banned && <Badge variant="destructive">Banned</Badge>}
           </div>
 
           <p className="text-sm text-muted-foreground truncate">{email}</p>
@@ -105,65 +157,101 @@ export const UserCard = ({
           </div>
         </div>
 
-        {loggedInUser?.username !== username && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ms-auto -mt-1.5 xl:opacity-0 xl:group-hover:opacity-100"
-                aria-label="Delete user"
-              >
-                <Trash2Icon />
-              </Button>
-            </AlertDialogTrigger>
+        {isOtherUser && (
+          <div className="flex ms-auto -mt-1.5 xl:opacity-0 xl:group-hover:opacity-100">
+            {role !== "admin" && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={isBanning}
+                    aria-label={banned ? "Unban user" : "Ban user"}
+                  >
+                    {banned ? <ShieldCheckIcon /> : <BanIcon />}
+                  </Button>
+                </AlertDialogTrigger>
 
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Delete User Account: {email}?
-                </AlertDialogTitle>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {banned ? "Unban" : "Ban"} User Account: {email}?
+                    </AlertDialogTitle>
 
-                <AlertDialogDescription>
-                  Are you sure you want to delete this user account? <br /> This
-                  action is permanent and cannot be undone. All user-related
-                  data will be permanently removed.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
+                    <AlertDialogDescription>
+                      {banned
+                        ? "This user will be able to log in and use the site again."
+                        : "This user will be logged out and will not be able to log in until you unban the account."}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
 
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-                <AlertDialogAction
-                  onClick={() => {
-                    const submitPromise = fetcher.submit(
-                      { userId },
-                      {
-                        action: '/admin/users',
-                        method: 'delete',
-                        encType: 'application/json',
-                      },
-                    );
+                    <AlertDialogAction
+                      onClick={() => {
+                        banFetcher.submit(
+                          { userId },
+                          {
+                            action: "/admin/users",
+                            method: "patch",
+                            encType: "application/json",
+                          },
+                        );
+                      }}
+                    >
+                      {banned ? "Unban" : "Ban"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
 
-                    toast.promise(submitPromise, {
-                      loading: 'Deleting User Account...',
-                      success: () => {
-                        if (onUserDeleteSuccess) onUserDeleteSuccess();
-
-                        return {
-                          message: 'User Account Deleted',
-                          description:
-                            'The user account has been permanently removed from the system.',
-                        };
-                      },
-                    });
-                  }}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Delete user"
                 >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  <Trash2Icon />
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Delete User Account: {email}?
+                  </AlertDialogTitle>
+
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this user account? <br /> This
+                    action is permanent and cannot be undone. All user-related
+                    data will be permanently removed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                  <AlertDialogAction
+                    onClick={() => {
+                      deleteFetcher.submit(
+                        { userId },
+                        {
+                          action: "/admin/users",
+                          method: "delete",
+                          encType: "application/json",
+                        },
+                      );
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
       </CardContent>
     </Card>

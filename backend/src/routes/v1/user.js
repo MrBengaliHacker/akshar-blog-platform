@@ -12,6 +12,9 @@ const validationError = require('../../middlewares/validationError');
 const uploadAvatar = require('../../middlewares/uploadAvatar');
 const demoGuard = require('../../middlewares/demoGuard');
 
+// Custom modules
+const config = require('../../config');
+
 // Controllers
 const getCurrentUser = require('../../controllers/v1/user/getCurrentUser');
 const updateCurrentUser = require('../../controllers/v1/user/updateCurrentUser');
@@ -25,9 +28,27 @@ const getPublicProfile = require('../../controllers/v1/user/getPublicProfile');
 // Models
 const User = require('../../models/user');
 
-// Demo admin cannot change the password, because everyone shares this account
-const demoPasswordGuard = (req, res, next) => {
-  if (req.body?.password) return demoGuard(req, res, next);
+// Demo admin cannot change the password (everyone shares this account)
+// or the email (the demo account is recognised by its email)
+const demoProfileGuard = async (req, res, next) => {
+  const { password, email } = req.body ?? {};
+
+  if (password) return demoGuard(req, res, next);
+
+  if (email) {
+    const user = await User.findById(req.userId).select('email');
+
+    if (
+      user?.email === config.DEMO_ADMIN_EMAIL &&
+      email.trim().toLowerCase() !== user.email
+    ) {
+      return res.status(403).json({
+        code: 'DemoRestriction',
+        message: 'This action is disabled in demo mode',
+      });
+    }
+  }
+
   return next();
 };
 
@@ -42,7 +63,7 @@ router.patch(
   '/current',
   authenticate,
   authorize(['admin', 'user']),
-  demoPasswordGuard,
+  demoProfileGuard,
   upload.single('avatar_image'), // ← multer reads file
   uploadAvatar,                  // ← uploads to Cloudinary
 

@@ -176,12 +176,16 @@ export const Dashboard = () => {
                 firstName,
                 lastName,
                 email,
+                avatar,
+                isBanned,
                 role,
                 createdAt,
               }) => (
                 <UserCard
                   key={_id}
                   userId={_id}
+                  avatar={avatar}
+                  isBanned={isBanned}
                   username={username}
                   firstName={firstName}
                   lastName={lastName}

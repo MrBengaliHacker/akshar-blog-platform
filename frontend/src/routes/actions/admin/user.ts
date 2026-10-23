@@ -17,11 +17,17 @@ const allUserAction: ActionFunction = async ({ request }) => {
     if (!accessToken) return redirect('/');
 
     try {
-      await aksharApi.delete(`/users/${data.userId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      });
+      // PATCH = ban or unban the user, DELETE = delete the user
+      if (request.method === 'PATCH') {
+        const response = await aksharApi.patch(`/users/${data.userId}/ban`);
+
+        return {
+          ok: true,
+          data: response.data,
+        } as ActionResponse<{ message: string; isBanned: boolean }>;
+      }
+
+      await aksharApi.delete(`/users/${data.userId}`);
 
       return { ok: true };
     } catch (err) {
