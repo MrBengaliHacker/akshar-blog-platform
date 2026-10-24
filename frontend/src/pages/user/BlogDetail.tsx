@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useLoaderData, useNavigate } from 'react-router';
+import { useLoaderData, useNavigate, Link } from 'react-router';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { toast } from 'sonner';
@@ -148,7 +148,7 @@ export const BlogDetail = () => {
           { headers: { Authorization: `Bearer ${accessToken}` } },
         );
       }
-    } catch (err) {
+    } catch {
       setLiked(prevLiked);
       setLikesCount(prevCount);
       toast.error('Something went wrong, please try again');
@@ -174,15 +174,14 @@ export const BlogDetail = () => {
         </h1>
 
         <div className='flex items-center gap-3 my-8'>
-          <div className='flex items-center gap-3'>
-            <Avatar 
-            name={getUsername(blog.author)} 
-            email={blog.author.email} 
-            src={blog.author.avatar || undefined} 
-            size='32' 
-            round />
+          <Link
+            to={`/profile/${blog.author._id}`}
+            viewTransition
+            className='flex items-center gap-3 hover:underline underline-offset-4'
+          >
+            <Avatar name={getUsername(blog.author)} email={blog.author.email} src={blog.author.avatar || undefined} size='32' round />
             <span>{getUsername(blog.author)}</span>
-          </div>
+          </Link>
 
           <Separator orientation='vertical' className='data-vertical:h-1 data-vertical:w-1 rounded-full' />
 

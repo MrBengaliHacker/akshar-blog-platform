@@ -120,7 +120,6 @@ export const CommentSection = ({ blogId, commentsCount: initialCommentsCount }: 
               <CommentCard
                 commentId={comment._id}
                 content={comment.content}
-                likesCount={comment.likesCount}
                 user={comment.userId}
                 blog={comment.blogId}
                 createdAt={comment.createdAt}

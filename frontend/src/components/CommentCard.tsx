@@ -14,24 +14,23 @@ import {
 } from "@/components/ui/tooltip";
 
 // Custom modules
-import { getUsername } from "@/lib/utils";
+import { getUsername, getErrorMessage } from "@/lib/utils";
 import { aksharApi } from "@/api";
 
 // Assets
 import {
-  ThumbsUpIcon,
   TrashIcon,
   SquareArrowOutUpRightIcon,
   Loader2Icon,
 } from "lucide-react";
 
 // Types
-import type { User, Blog } from "@/types";
+import type { AxiosError } from "axios";
+import type { User, Blog, ErrorResponse } from "@/types";
 
 type Props = {
   commentId?: string;
   content: string;
-  likesCount: number;
   user: User | null;
   blog: Blog;
   createdAt: string;
@@ -43,7 +42,6 @@ type Props = {
 export const CommentCard = ({
   commentId,
   content,
-  likesCount,
   user,
   blog,
   createdAt,
@@ -59,57 +57,64 @@ export const CommentCard = ({
     (currentUserId === user?._id || currentUserRole === "admin");
 
   const handleDelete = async () => {
-  if (!commentId || !canDelete || isDeleting) {
-    return;
-  }
+    if (!commentId || !canDelete || isDeleting) {
+      return;
+    }
 
-  const token = localStorage.getItem("accessToken");
+    try {
+      setIsDeleting(true);
 
-  if (!token) {
-    toast.error("Please log in to delete this comment");
-    return;
-  }
+      await aksharApi.delete(`/comments/${commentId}`);
 
-  try {
-    setIsDeleting(true);
+      toast.success("Comment deleted");
 
-    await aksharApi.delete(`/comments/${commentId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    toast.success("Comment deleted");
-
-    onDeleteSuccess?.();
-  } catch (error: any) {
-    console.error("Error deleting comment:", error);
-
-    toast.error(
-      error?.response?.data?.message || "Failed to delete comment",
-    );
-  } finally {
-    setIsDeleting(false);
-  }
-};
+      onDeleteSuccess?.();
+    } catch (err) {
+      toast.error("Failed to delete comment", {
+        description: getErrorMessage(
+          (err as AxiosError<ErrorResponse>).response?.data,
+        ),
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="@container">
       <div className="group flex flex-col items-start gap-4 p-4 rounded-xl hover:bg-accent/25 @md:flex-row">
-        <Avatar
-          name={user ? getUsername(user) : "Deleted User"}
-          email={user?.email}
-          src={user?.avatar || undefined}
-          size="40"
-          round
-        />
+        {user ? (
+          <Link
+            to={`/profile/${user._id}`}
+            viewTransition
+            aria-label={`Profile of ${user.username}`}
+          >
+            <Avatar
+              name={getUsername(user)}
+              email={user.email}
+              src={user.avatar || undefined}
+              size="40"
+              round
+            />
+          </Link>
+        ) : (
+          <Avatar
+            name="Deleted User"
+            size="40"
+            round
+          />
+        )}
 
         <div className="flex flex-col gap-2 me-auto">
           <div className="flex items-center gap-2">
             {user ? (
-              <div className="text-sm text-muted-foreground">
+              <Link
+                to={`/profile/${user._id}`}
+                viewTransition
+                className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+              >
                 @{user.username}
-              </div>
+              </Link>
             ) : (
               <div className="text-sm text-destructive/80 italic">
                 <Tooltip delayDuration={250}>
@@ -144,21 +149,8 @@ export const CommentCard = ({
 
           <div className="max-w-[60ch]">{content}</div>
 
-          <div className="flex items-center gap-2 mt-1">
-            <Button
-              variant="ghost"
-              aria-label="Like comment"
-            >
-              <ThumbsUpIcon />
-
-              {likesCount > 0 && (
-                <span className="sr-only">
-                  Total likes: {likesCount}
-                </span>
-              )}
-            </Button>
-
-            {canDelete && (
+          {canDelete && (
+            <div className="flex items-center gap-2 mt-1">
               <Button
                 variant="ghost"
                 aria-label="Remove comment"
@@ -173,8 +165,8 @@ export const CommentCard = ({
 
                 {isDeleting ? "Removing..." : "Remove"}
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {blog && (

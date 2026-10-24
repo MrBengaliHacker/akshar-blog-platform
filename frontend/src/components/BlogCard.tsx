@@ -22,6 +22,7 @@ interface BlogCardProps extends React.ComponentProps<'div'> {
   content?: string;
   slug: string;
   authorName: string;
+  authorId?: string;
   publishedAt: string;
   size?: 'default' | 'sm';
 }
@@ -34,6 +35,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({
   content,
   slug,
   authorName,
+  authorId,
   publishedAt,
   size = 'default',
   className,
@@ -69,7 +71,19 @@ export const BlogCard: React.FC<BlogCardProps> = ({
         )}
       >
         <div className='flex items-center gap-2 text-muted-foreground text-sm font-medium'>
-          <p className='@max-3xs:hidden'>{authorName}</p>
+          <p className='@max-3xs:hidden'>
+            {authorId ? (
+              <Link
+                to={`/profile/${authorId}`}
+                viewTransition
+                className='underline-offset-4 hover:underline'
+              >
+                {authorName}
+              </Link>
+            ) : (
+              authorName
+            )}
+          </p>
 
           <div className='w-1 h-1 rounded-full bg-muted-foreground/50 @max-3xs:hidden'></div>
 

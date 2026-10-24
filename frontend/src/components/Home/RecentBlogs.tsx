@@ -1,10 +1,8 @@
 import { useLoaderData } from 'react-router';
 import { motion } from 'motion/react';
 
-
 // Custom modules
-import { cn } from '@/lib/utils';
-
+import { cn, getUsername } from '@/lib/utils';
 
 // Components
 import { BlogCard } from '@/components/BlogCard'
@@ -80,11 +78,8 @@ export const RecentBlogs = ({
                   title={title}
                   content={content}
                   slug={slug}
-                  authorName={
-                    author.firstName || author.lastName
-                      ? `${author.firstName ?? ''} ${author.lastName ?? ''}`.trim()
-                      : author.username
-                  }
+                  authorId={author?._id}
+                  authorName={author ? getUsername(author) : 'Deleted User'}
                   publishedAt={publishedAt}
                   size={index > 0 ? 'sm' : 'default'}
                 />

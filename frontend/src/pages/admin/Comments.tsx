@@ -54,14 +54,13 @@ export const Comments = () => {
       <div>
         {allComments.map(
           (
-            { _id, content, likesCount, userId, blogId, createdAt },
+            { _id, content, userId, blogId, createdAt },
             index,
             arr,
           ) => (
             <Fragment key={_id}>
               <CommentCard
                 content={content}
-                likesCount={likesCount}
                 user={userId}
                 blog={blogId}
                 createdAt={createdAt}

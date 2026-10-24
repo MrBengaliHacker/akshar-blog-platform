@@ -24,6 +24,7 @@ import { Button } from "./ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { InputPassword } from "@/components/InputPassword";
 import {
   AlertDialog,
@@ -56,6 +57,8 @@ import type { AxiosError } from "axios";
 import type { DialogProps } from "@radix-ui/react-dialog";
 import type { ActionResponse, ErrorResponse, ValidationError } from "@/types";
 
+// A link is checked by the server, here only the length
+const linkField = z.string().max(100, "Link must be less than 100 characters").optional();
 
 // Profile Form Schema
 const profileFormSchema = z.object({
@@ -66,7 +69,24 @@ const profileFormSchema = z.object({
     .max(50, "Email must be less than 50 characters")
     .email("Invalid email address").optional(),
   username: z.string().max(20, "Username must be less than 20 characters").optional(),
+  bio: z.string().max(200, "Bio must be less than 200 characters").optional(),
+  website: linkField,
+  facebook: linkField,
+  instagram: linkField,
+  linkedin: linkField,
+  x: linkField,
+  youtube: linkField,
 });
+
+// The social links shown in the form
+const SOCIAL_FIELDS = [
+  { name: "website", label: "Website", placeholder: "https://yoursite.com" },
+  { name: "facebook", label: "Facebook", placeholder: "https://facebook.com/username" },
+  { name: "instagram", label: "Instagram", placeholder: "https://instagram.com/username" },
+  { name: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/username" },
+  { name: "x", label: "X", placeholder: "https://x.com/username" },
+  { name: "youtube", label: "YouTube", placeholder: "https://youtube.com/@username" },
+] as const;
 
 type ProfileFieldName = keyof z.infer<typeof profileFormSchema>;
 
@@ -89,6 +109,13 @@ const ProfileSettingsForm = () => {
       lastName: "",
       email: user?.email,
       username: user?.username,
+      bio: "",
+      website: "",
+      facebook: "",
+      instagram: "",
+      linkedin: "",
+      x: "",
+      youtube: "",
     },
   });
 
@@ -102,6 +129,13 @@ const ProfileSettingsForm = () => {
           lastName: data.user.lastName ?? "",
           email: data.user.email,
           username: data.user.username,
+          bio: data.user.bio ?? "",
+          website: data.user.socialLinks?.website ?? "",
+          facebook: data.user.socialLinks?.facebook ?? "",
+          instagram: data.user.socialLinks?.instagram ?? "",
+          linkedin: data.user.socialLinks?.linkedin ?? "",
+          x: data.user.socialLinks?.x ?? "",
+          youtube: data.user.socialLinks?.youtube ?? "",
         });
       })
       .catch(() => {});
@@ -326,6 +360,64 @@ const ProfileSettingsForm = () => {
             </FormItem>
           )}
         />
+
+        <Separator className="my-5" />
+
+        <FormField
+          control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FormItem className="grid gap-2 items-start lg:grid-cols-[1fr_2fr]">
+              <FormLabel>Bio</FormLabel>
+
+              <div className="space-y-2">
+                <FormControl>
+                  <Textarea
+                    placeholder="A few words about you"
+                    rows={3}
+                    maxLength={200}
+                    {...field}
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <Separator className="my-5" />
+
+        <div>
+          <h3 className="font-semibold text-lg">Social links</h3>
+
+          <p className="text-sm text-muted-foreground">
+            These links are shown on your public profile. Leave a field empty to remove it.
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-4">
+          {SOCIAL_FIELDS.map(({ name, label, placeholder }) => (
+            <FormField
+              key={name}
+              control={form.control}
+              name={name}
+              render={({ field }) => (
+                <FormItem className="grid gap-2 items-start lg:grid-cols-[1fr_2fr]">
+                  <FormLabel>{label}</FormLabel>
+
+                  <div className="space-y-2">
+                    <FormControl>
+                      <Input type="text" placeholder={placeholder} {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
 
         <Separator className="my-5" />
 

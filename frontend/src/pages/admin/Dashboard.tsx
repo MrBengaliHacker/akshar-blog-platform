@@ -129,14 +129,13 @@ export const Dashboard = () => {
           <CardContent className='px-4'>
             {loaderData.comments.map(
               (
-                { _id, content, likesCount, userId, blogId, createdAt },
+                { _id, content, userId, blogId, createdAt },
                 index,
                 array,
               ) => (
                 <Fragment key={_id}>
                   <CommentCard
                     content={content}
-                    likesCount={likesCount}
                     user={userId}
                     blog={blogId}
                     createdAt={createdAt}
