@@ -2,23 +2,13 @@ import { Link } from 'react-router';
 
 // Custom Modules
 import { cn } from '@/lib/utils';
+import { SOCIAL_LINKS } from '@/lib/constants';
 
 // Components
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
-
-// Assets
-import { FaFacebook, FaInstagram, FaXTwitter, FaLinkedin, FaYoutube } from 'react-icons/fa6';
-
-const SOCIAL_LINKS = [
-  { href: 'https://facebook.com/ritam.mondal.470261', Icon: FaFacebook, label: 'Facebook' },
-  { href: 'https://instagram.com/mr_bengali_hacker', Icon: FaInstagram, label: 'Instagram' },
-  { href: 'https://x.com/MrBengaliHacker', Icon: FaXTwitter, label: 'X' },
-  { href: 'https://linkedin.com/in/ritam-mondal-677944322', Icon: FaLinkedin, label: 'LinkedIn' },
-  { href: 'https://youtube.com/@mr.bengali_hacker', Icon: FaYoutube, label: 'YouTube' },
-] as const;
 
 const FOOTER_LINKS = {
   Platform: [

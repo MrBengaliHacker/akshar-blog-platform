@@ -31,6 +31,10 @@ import { BlogCreate } from "@/pages/admin/BlogCreate";
 import { BlogEdit } from "@/pages/admin/BlogEdit";
 import { UserDashboardLayout } from "@/components/layouts/UserDashboardLayout";
 import { MyBlogs } from "@/pages/user/MyBlogs";
+import { About } from "@/pages/user/About";
+import { Contact } from "@/pages/user/Contact";
+import { NotFound } from "@/pages/error/NotFound";
+import { PageLoading } from "@/components/PageLoading";
 
 // Actions
 import signupAction from "@/routes/actions/auth/signup";
@@ -49,15 +53,18 @@ const router = createBrowserRouter([
     path: '/login',
     Component: Login,
     action: loginAction,
+    ErrorBoundary: RootErrorBoundary,
   },
   {
     path: '/signup',
     Component: Signup,
     action: signupAction,
+    ErrorBoundary: RootErrorBoundary,
   },
   {
     path: '/refresh-token',
-    loader: refreshTokenLoader
+    loader: refreshTokenLoader,
+    HydrateFallback: PageLoading,
   },
   {
     path: '/',
@@ -83,6 +90,19 @@ const router = createBrowserRouter([
         Component: Profile,
         loader: profileLoader,
       },
+      {
+        path: 'about',
+        Component: About,
+      },
+      {
+        path: 'contact',
+        Component: Contact,
+      },
+      {
+        // Any other address inside the site: show the 404 page with header and footer
+        path: '*',
+        Component: NotFound,
+      },
     ]
   },
   {
@@ -90,6 +110,7 @@ const router = createBrowserRouter([
     Component: UserDashboardLayout,
     loader: authGuardLoader,
     ErrorBoundary: RootErrorBoundary,
+    HydrateFallback: PageLoading,
     children:[
       {
         index: true,
@@ -118,6 +139,7 @@ const router = createBrowserRouter([
     Component: AdminLayout,
     loader: adminLoader,
     ErrorBoundary: RootErrorBoundary,
+    HydrateFallback: PageLoading,
     children:[
       {
         path: 'dashboard',
