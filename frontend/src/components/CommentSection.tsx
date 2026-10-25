@@ -38,7 +38,7 @@ export const CommentSection = ({ blogId, commentsCount: initialCommentsCount }: 
     try {
       const { data } = await aksharApi.get(`/comments/blog/${blogId}`);
       setComments(data.comments);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load comments');
     } finally {
       setIsLoading(false);
@@ -72,7 +72,7 @@ export const CommentSection = ({ blogId, commentsCount: initialCommentsCount }: 
       setCount((prev) => prev + 1);
       setNewComment('');
       toast.success('Comment added');
-    } catch (err) {
+    } catch {
       toast.error('Failed to add comment');
     } finally {
       setIsSubmitting(false);

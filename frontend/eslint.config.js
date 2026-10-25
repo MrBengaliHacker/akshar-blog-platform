@@ -19,4 +19,16 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // These files export components together with variants, hooks or columns.
+    // That is normal for shadcn/ui, so Fast Refresh warnings are turned off here.
+    files: [
+      'src/components/ui/**',
+      'src/components/ThemeProvider.tsx',
+      'src/components/BlogTable.tsx',
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])
