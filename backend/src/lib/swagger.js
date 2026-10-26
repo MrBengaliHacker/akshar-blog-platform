@@ -22,7 +22,7 @@ This API uses JWT Bearer token authentication.
 |------|-------|----------|
 | Admin | demo@akshar.com | Demo@1234 |
 
-> ⚠️ Destructive actions (delete, ban) are disabled in demo mode.
+> ⚠️ The demo admin is view-only. Creating or editing blogs, deleting, banning and changing the profile are disabled in demo mode.
 
 ## Roles
 - **user** → Can create, edit own blogs, comment, like
@@ -56,7 +56,10 @@ This API uses JWT Bearer token authentication.
             username: { type: 'string', example: 'user_abc123' },
             email: { type: 'string', example: 'john@gmail.com' },
             role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
-            avatar: { type: 'string', example: 'https://res.cloudinary.com/...' },
+            avatar: {
+              type: 'string',
+              example: 'https://res.cloudinary.com/...',
+            },
             bio: { type: 'string', example: 'I love writing blogs!' },
             firstName: { type: 'string', example: 'John' },
             lastName: { type: 'string', example: 'Doe' },
@@ -85,17 +88,27 @@ This API uses JWT Bearer token authentication.
             banner: {
               type: 'object',
               properties: {
-                url: { type: 'string', example: 'https://res.cloudinary.com/...' },
+                url: {
+                  type: 'string',
+                  example: 'https://res.cloudinary.com/...',
+                },
                 width: { type: 'number', example: 800 },
                 height: { type: 'number', example: 450 },
               },
             },
             author: { $ref: '#/components/schemas/User' },
-            status: { type: 'string', enum: ['draft', 'published'], example: 'published' },
+            status: {
+              type: 'string',
+              enum: ['draft', 'published'],
+              example: 'published',
+            },
             viewsCount: { type: 'number', example: 100 },
             likesCount: { type: 'number', example: 50 },
             commentsCount: { type: 'number', example: 10 },
-            publishedAt: { type: 'string', example: '2026-01-01T00:00:00.000Z' },
+            publishedAt: {
+              type: 'string',
+              example: '2026-01-01T00:00:00.000Z',
+            },
           },
         },
         Comment: {
@@ -135,14 +148,14 @@ This API uses JWT Bearer token authentication.
       { name: 'AI', description: 'AI writing assistant endpoints' },
     ],
     paths: {
-
       // ─── AUTH ─────────────────────────────────────────
       '/auth/register': {
         post: {
           tags: ['Auth'],
           summary: 'Register a new user',
           security: [],
-          description: 'Register a new user account. To register as **admin**, your email must be whitelisted in `ADMIN_EMAILS` or be the `DEMO_ADMIN_EMAIL`.',
+          description:
+            'Register a new user account. To register as **admin**, your email must be whitelisted in `ADMIN_EMAILS` or be the `DEMO_ADMIN_EMAIL`.',
           requestBody: {
             required: true,
             content: {
@@ -152,7 +165,11 @@ This API uses JWT Bearer token authentication.
                   required: ['email', 'password'],
                   properties: {
                     email: { type: 'string', example: 'john@gmail.com' },
-                    password: { type: 'string', example: 'password123', minLength: 8 },
+                    password: {
+                      type: 'string',
+                      example: 'password123',
+                      minLength: 8,
+                    },
                     role: {
                       type: 'string',
                       enum: ['user', 'admin'],
@@ -191,7 +208,8 @@ This API uses JWT Bearer token authentication.
           tags: ['Auth'],
           summary: 'Login user',
           security: [],
-          description: 'Login with email and password. Returns access token and sets refresh token in httpOnly cookie.',
+          description:
+            'Login with email and password. Returns access token and sets refresh token in httpOnly cookie.',
           requestBody: {
             required: true,
             content: {
@@ -232,7 +250,8 @@ This API uses JWT Bearer token authentication.
           tags: ['Auth'],
           summary: 'Refresh access token',
           security: [],
-          description: 'Get a new access token using the refresh token stored in httpOnly cookie. Call this when access token expires.',
+          description:
+            'Get a new access token using the refresh token stored in httpOnly cookie. Call this when access token expires.',
           responses: {
             200: {
               description: 'New access token generated',
@@ -256,7 +275,8 @@ This API uses JWT Bearer token authentication.
         post: {
           tags: ['Auth'],
           summary: 'Logout user',
-          description: 'Deletes refresh token from DB and clears httpOnly cookie.',
+          description:
+            'Deletes refresh token from DB and clears httpOnly cookie.',
           responses: {
             204: { description: 'Logged out successfully' },
             500: { description: 'Server error' },
@@ -289,14 +309,19 @@ This API uses JWT Bearer token authentication.
         patch: {
           tags: ['Users'],
           summary: 'Update current user',
-          description: 'Update profile fields. All fields are optional. Upload avatar_image as file.',
+          description:
+            'Update profile fields. All fields are optional. Upload avatar_image as file.',
           requestBody: {
             content: {
               'multipart/form-data': {
                 schema: {
                   type: 'object',
                   properties: {
-                    avatar_image: { type: 'string', format: 'binary', description: 'Max 1MB' },
+                    avatar_image: {
+                      type: 'string',
+                      format: 'binary',
+                      description: 'Max 1MB',
+                    },
                     username: { type: 'string', maxLength: 20 },
                     email: { type: 'string' },
                     password: { type: 'string', minLength: 8 },
@@ -323,7 +348,8 @@ This API uses JWT Bearer token authentication.
         delete: {
           tags: ['Users'],
           summary: 'Delete own account',
-          description: 'Permanently deletes account, all blogs, banners from Cloudinary and refresh tokens.',
+          description:
+            'Permanently deletes account, all blogs, banners from Cloudinary and refresh tokens.',
           responses: {
             204: { description: 'Account deleted successfully' },
             401: { description: 'Unauthorized' },
@@ -337,8 +363,18 @@ This API uses JWT Bearer token authentication.
           summary: 'Get all users',
           description: '**Admin only.** Returns paginated list of all users.',
           parameters: [
-            { name: 'limit', in: 'query', description: 'Max 50', schema: { type: 'integer', default: 20 } },
-            { name: 'offset', in: 'query', description: 'Skip count', schema: { type: 'integer', default: 0 } },
+            {
+              name: 'limit',
+              in: 'query',
+              description: 'Max 50',
+              schema: { type: 'integer', default: 20 },
+            },
+            {
+              name: 'offset',
+              in: 'query',
+              description: 'Skip count',
+              schema: { type: 'integer', default: 0 },
+            },
           ],
           responses: {
             200: {
@@ -371,7 +407,12 @@ This API uses JWT Bearer token authentication.
           summary: 'Get user by ID',
           description: '**Admin only.**',
           parameters: [
-            { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'userId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             200: { description: 'User data' },
@@ -381,13 +422,21 @@ This API uses JWT Bearer token authentication.
         delete: {
           tags: ['Users'],
           summary: 'Delete user by ID',
-          description: '**Admin only.** Permanently deletes user and all their data.',
+          description:
+            '**Admin only.** Permanently deletes user and all their data.',
           parameters: [
-            { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'userId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             204: { description: 'User deleted' },
-            403: { description: 'Demo mode restriction or insufficient permissions' },
+            403: {
+              description: 'Demo mode restriction or insufficient permissions',
+            },
             404: { description: 'User not found' },
           },
         },
@@ -397,9 +446,15 @@ This API uses JWT Bearer token authentication.
         patch: {
           tags: ['Users'],
           summary: 'Ban or unban user',
-          description: '**Admin only.** Toggles ban status. Banned users cannot access protected endpoints.',
+          description:
+            '**Admin only.** Toggles ban status. Banned users cannot access protected endpoints.',
           parameters: [
-            { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'userId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             200: {
@@ -409,14 +464,41 @@ This API uses JWT Bearer token authentication.
                   schema: {
                     type: 'object',
                     properties: {
-                      message: { type: 'string', example: 'User banned successfully' },
+                      message: {
+                        type: 'string',
+                        example: 'User banned successfully',
+                      },
                       isBanned: { type: 'boolean' },
                     },
                   },
                 },
               },
             },
-            403: { description: 'Demo mode restriction or insufficient permissions' },
+            403: {
+              description: 'Demo mode restriction or insufficient permissions',
+            },
+            404: { description: 'User not found' },
+          },
+        },
+      },
+
+      '/users/profile/{userId}': {
+        get: {
+          tags: ['Users'],
+          summary: 'Get public profile',
+          description:
+            'Public. Returns the profile (bio, avatar, social links) and the published blogs of a user. The email is not returned.',
+          security: [],
+          parameters: [
+            {
+              name: 'userId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {
+            200: { description: 'Public profile and published blogs' },
             404: { description: 'User not found' },
           },
         },
@@ -427,7 +509,8 @@ This API uses JWT Bearer token authentication.
         post: {
           tags: ['Blogs'],
           summary: 'Create a new blog',
-          description: 'Create a blog post with banner image. Content should be HTML from Tiptap editor. Slug is auto-generated.',
+          description:
+            'Create a blog post with banner image. Content should be HTML from Tiptap editor. Slug is auto-generated.',
           requestBody: {
             required: true,
             content: {
@@ -436,10 +519,26 @@ This API uses JWT Bearer token authentication.
                   type: 'object',
                   required: ['banner_image', 'title', 'content'],
                   properties: {
-                    banner_image: { type: 'string', format: 'binary', description: 'Max 2MB, jpg/png/webp' },
-                    title: { type: 'string', example: 'My First Blog', maxLength: 180 },
-                    content: { type: 'string', example: '<p>Hello world</p>', description: 'HTML content from Tiptap' },
-                    status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
+                    banner_image: {
+                      type: 'string',
+                      format: 'binary',
+                      description: 'Max 2MB, jpg/png/webp',
+                    },
+                    title: {
+                      type: 'string',
+                      example: 'My First Blog',
+                      maxLength: 180,
+                    },
+                    content: {
+                      type: 'string',
+                      example: '<p>Hello world</p>',
+                      description: 'HTML content from Tiptap',
+                    },
+                    status: {
+                      type: 'string',
+                      enum: ['draft', 'published'],
+                      default: 'draft',
+                    },
                   },
                 },
               },
@@ -453,10 +552,26 @@ This API uses JWT Bearer token authentication.
         get: {
           tags: ['Blogs'],
           summary: 'Get all blogs',
-          description: 'Admin sees all blogs (draft + published). Regular users see published only.',
+          description:
+            'Public. Returns published blogs. An admin can send `includeDrafts=true` (with the access token) to also see drafts.',
+          security: [{}, { bearerAuth: [] }],
           parameters: [
-            { name: 'limit', in: 'query', schema: { type: 'integer', default: 20 } },
-            { name: 'offset', in: 'query', schema: { type: 'integer', default: 0 } },
+            {
+              name: 'limit',
+              in: 'query',
+              schema: { type: 'integer', default: 20 },
+            },
+            {
+              name: 'offset',
+              in: 'query',
+              schema: { type: 'integer', default: 0 },
+            },
+            {
+              name: 'includeDrafts',
+              in: 'query',
+              description: 'Admin only: also return draft blogs',
+              schema: { type: 'boolean', default: false },
+            },
           ],
           responses: {
             200: {
@@ -486,11 +601,26 @@ This API uses JWT Bearer token authentication.
         get: {
           tags: ['Blogs'],
           summary: 'Get blogs by user',
-          description: 'Admin sees all statuses. Regular users see published only.',
+          description:
+            'Public. Returns published blogs. The owner and admins also see drafts (send the access token).',
+          security: [{}, { bearerAuth: [] }],
           parameters: [
-            { name: 'userId', in: 'path', required: true, schema: { type: 'string' } },
-            { name: 'limit', in: 'query', schema: { type: 'integer', default: 20 } },
-            { name: 'offset', in: 'query', schema: { type: 'integer', default: 0 } },
+            {
+              name: 'userId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+            {
+              name: 'limit',
+              in: 'query',
+              schema: { type: 'integer', default: 20 },
+            },
+            {
+              name: 'offset',
+              in: 'query',
+              schema: { type: 'integer', default: 0 },
+            },
           ],
           responses: {
             200: { description: 'List of blogs by user' },
@@ -503,9 +633,16 @@ This API uses JWT Bearer token authentication.
         get: {
           tags: ['Blogs'],
           summary: 'Get blog by slug',
-          description: 'Increments view count once per user per day using cookie tracking.',
+          description:
+            'Public for published blogs. Drafts are visible only to the owner and admins (send the access token). Increments the view count once per user per day using cookie tracking.',
+          security: [{}, { bearerAuth: [] }],
           parameters: [
-            { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'slug',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             200: {
@@ -519,7 +656,7 @@ This API uses JWT Bearer token authentication.
                 },
               },
             },
-            403: { description: 'Draft blog — admin access only' },
+            403: { description: 'Draft blog — owner or admin only' },
             404: { description: 'Blog not found' },
           },
         },
@@ -529,9 +666,15 @@ This API uses JWT Bearer token authentication.
         patch: {
           tags: ['Blogs'],
           summary: 'Update blog',
-          description: 'Only blog owner or admin can update. All fields optional.',
+          description:
+            'Only blog owner or admin can update. All fields optional.',
           parameters: [
-            { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'blogId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           requestBody: {
             content: {
@@ -539,7 +682,11 @@ This API uses JWT Bearer token authentication.
                 schema: {
                   type: 'object',
                   properties: {
-                    banner_image: { type: 'string', format: 'binary', description: 'Max 2MB' },
+                    banner_image: {
+                      type: 'string',
+                      format: 'binary',
+                      description: 'Max 2MB',
+                    },
                     title: { type: 'string' },
                     content: { type: 'string' },
                     status: { type: 'string', enum: ['draft', 'published'] },
@@ -557,9 +704,15 @@ This API uses JWT Bearer token authentication.
         delete: {
           tags: ['Blogs'],
           summary: 'Delete blog',
-          description: 'Only blog owner or admin can delete. Also removes banner from Cloudinary.',
+          description:
+            'Only blog owner or admin can delete. Also removes banner from Cloudinary.',
           parameters: [
-            { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'blogId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             204: { description: 'Blog deleted successfully' },
@@ -576,7 +729,12 @@ This API uses JWT Bearer token authentication.
           summary: 'Like a blog',
           description: 'Like a blog post. Each user can only like once.',
           parameters: [
-            { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'blogId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             200: {
@@ -599,7 +757,12 @@ This API uses JWT Bearer token authentication.
           summary: 'Unlike a blog',
           description: 'Remove your like from a blog post.',
           parameters: [
-            { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'blogId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             204: { description: 'Blog unliked successfully' },
@@ -609,13 +772,44 @@ This API uses JWT Bearer token authentication.
       },
 
       // ─── COMMENTS ─────────────────────────────────────
+      '/comments': {
+        get: {
+          tags: ['Comments'],
+          summary: 'Get all comments (admin)',
+          description:
+            'Admin only. Returns the latest comments of all blogs with pagination.',
+          parameters: [
+            {
+              name: 'limit',
+              in: 'query',
+              schema: { type: 'integer', default: 20 },
+            },
+            {
+              name: 'offset',
+              in: 'query',
+              schema: { type: 'integer', default: 0 },
+            },
+          ],
+          responses: {
+            200: { description: 'List of comments' },
+            403: { description: 'Admin access only' },
+          },
+        },
+      },
+
       '/comments/blog/{blogId}': {
         post: {
           tags: ['Comments'],
           summary: 'Add comment to blog',
-          description: 'Add a comment to a blog post. Content is sanitized with DOMPurify.',
+          description:
+            'Add a comment to a blog post. Content is plain text (max 1000 characters).',
           parameters: [
-            { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'blogId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           requestBody: {
             required: true,
@@ -625,7 +819,11 @@ This API uses JWT Bearer token authentication.
                   type: 'object',
                   required: ['content'],
                   properties: {
-                    content: { type: 'string', example: 'Great blog post!', maxLength: 1000 },
+                    content: {
+                      type: 'string',
+                      example: 'Great blog post!',
+                      maxLength: 1000,
+                    },
                   },
                 },
               },
@@ -639,9 +837,15 @@ This API uses JWT Bearer token authentication.
         get: {
           tags: ['Comments'],
           summary: 'Get comments by blog',
-          description: 'Returns all comments for a blog post sorted by newest first.',
+          description:
+            'Returns all comments for a blog post sorted by newest first.',
           parameters: [
-            { name: 'blogId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'blogId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             200: {
@@ -671,7 +875,12 @@ This API uses JWT Bearer token authentication.
           summary: 'Delete comment',
           description: 'Only comment owner or admin can delete.',
           parameters: [
-            { name: 'commentId', in: 'path', required: true, schema: { type: 'string' } },
+            {
+              name: 'commentId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             204: { description: 'Comment deleted successfully' },
@@ -697,7 +906,9 @@ This API uses JWT Bearer token authentication.
 - \`tone_formal\` → Rewrite in formal tone
 - \`tone_casual\` → Rewrite in casual tone
 - \`fullBlog\` → Write complete blog from topic
-- \`freePrompt\` → Free form AI writing prompt`,
+- \`freePrompt\` → Free form AI writing prompt
+
+**Limits:** every user has a small daily limit (3 requests per day, admin 10) and there is one daily limit for all users together. A failed request is not counted. See \`GET /ai/usage\` to know how many are left.`,
           requestBody: {
             required: true,
             content: {
@@ -739,14 +950,61 @@ This API uses JWT Bearer token authentication.
                   schema: {
                     type: 'object',
                     properties: {
-                      text: { type: 'string', example: 'AI generated content here...' },
+                      text: {
+                        type: 'string',
+                        example: 'AI generated content here...',
+                      },
+                      usage: {
+                        type: 'object',
+                        properties: {
+                          used: { type: 'integer', example: 1 },
+                          limit: { type: 'integer', example: 3 },
+                          remaining: { type: 'integer', example: 2 },
+                        },
+                      },
                     },
                   },
                 },
               },
             },
-            400: { description: 'Invalid action' },
+            400: {
+              description:
+                'Invalid action, or the AI could not answer this request',
+            },
+            429: { description: 'Daily AI limit reached, or the AI is busy' },
             500: { description: 'AI service error' },
+            503: { description: 'AI assistant is not configured' },
+          },
+
+          '/ai/usage': {
+            get: {
+              tags: ['AI'],
+              summary: 'AI requests left today',
+              description:
+                'Returns how many AI requests the current user has used and has left today.',
+              responses: {
+                200: {
+                  description: 'Usage of today',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          usage: {
+                            type: 'object',
+                            properties: {
+                              used: { type: 'integer', example: 1 },
+                              limit: { type: 'integer', example: 3 },
+                              remaining: { type: 'integer', example: 2 },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
