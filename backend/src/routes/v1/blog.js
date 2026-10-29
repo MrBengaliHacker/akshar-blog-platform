@@ -10,6 +10,9 @@ const uploadBlogBanner = require('../../middlewares/uploadBlogBanner');
 const demoGuard = require('../../middlewares/demoGuard');
 const optionalAuthenticate = require('../../middlewares/optionalAuthenticate');
 
+// Custom modules
+const { CATEGORY_SLUGS } = require('../../lib/categories');
+
 // Controllers
 const createBlog = require('../../controllers/v1/blog/createBlog');
 const getAllBlogs = require('../../controllers/v1/blog/getAllBlogs');
@@ -52,6 +55,11 @@ router.post(
     .isIn(['draft', 'published'])
     .withMessage('Status must be draft or published'),
 
+  body('category')
+    .optional()
+    .isIn(CATEGORY_SLUGS)
+    .withMessage('Choose a valid category'),
+
   validationError,
   uploadBlogBanner('post'),
   createBlog,
@@ -68,6 +76,10 @@ router.get(
     .optional()
     .isInt({ min: 0 })
     .withMessage('Offset must be a positive integer'),
+  query('category')
+    .optional()
+    .isIn(CATEGORY_SLUGS)
+    .withMessage('Invalid category'),
   validationError,
   getAllBlogs,
 )
@@ -123,6 +135,10 @@ router.patch(
     .optional()
     .isIn(['draft', 'published'])
     .withMessage('Status must be draft or published'),
+  body('category')
+    .optional()
+    .isIn(CATEGORY_SLUGS)
+    .withMessage('Choose a valid category'),
   validationError,
   uploadBlogBanner('put'),
   updateBlog,

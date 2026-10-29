@@ -15,7 +15,7 @@ const purify = DOMPurify(window);
 
 const updateBlog = async (req, res) => {
   try {
-    const { title, content, banner, status } = req.body;
+    const { title, content, banner, status, category } = req.body;
     const userId = req.userId;
     const { blogId } = req.params;
 
@@ -50,7 +50,8 @@ const updateBlog = async (req, res) => {
     }
     if (banner) blog.banner = banner;
     if (status) blog.status = status;
-
+    if (category) blog.category = category;
+    
     await blog.save();
 
     const blogObject = blog.toObject();

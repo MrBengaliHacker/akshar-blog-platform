@@ -14,7 +14,7 @@ const purify = DOMPurify(window);
 
 const createBlog = async (req, res) => {
   try {
-    const { title, content, banner, status } = req.body;
+    const { title, content, banner, status, category } = req.body;
     const userId = req.userId;
 
     // Sanitize HTML content from Tiptap
@@ -25,6 +25,7 @@ const createBlog = async (req, res) => {
       content: cleanContent,
       banner,
       status,
+      category,
       author: userId,
     });
 

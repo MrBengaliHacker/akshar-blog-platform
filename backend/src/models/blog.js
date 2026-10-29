@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const { genSlug } = require('../utils');
 
+// Custom modules
+const { CATEGORY_SLUGS, DEFAULT_CATEGORY } = require('../lib/categories');
+
 const blogSchema = new mongoose.Schema(
   {
     title: {
@@ -59,6 +62,15 @@ const blogSchema = new mongoose.Schema(
         message: '{VALUE} is not supported',
       },
       default: 'draft',
+    },
+    category: {
+      type: String,
+      enum: {
+        values: CATEGORY_SLUGS,
+        message: '{VALUE} is not a valid category',
+      },
+      default: DEFAULT_CATEGORY,
+      index: true,
     },
   },
   {

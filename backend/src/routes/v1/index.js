@@ -8,7 +8,7 @@ const blogRoutes = require('./blog');
 const likeRoutes = require('./like');
 const commentRoutes = require('./comment');
 const aiRoutes = require('./ai');
-
+const categoryRoutes = require('./category');
 
 router.get('/', (req, res) => {
   res.status(200).json({
@@ -26,5 +26,6 @@ router.use('/blogs', blogRoutes);
 router.use('/likes', likeRoutes);
 router.use('/comments', commentRoutes);
 router.use('/ai', aiRoutes);
+router.use('/categories', categoryRoutes);
 
 module.exports = router;
