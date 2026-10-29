@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from "react-router";
+import { MotionConfig } from 'motion/react';
 
 import './index.css'
 
@@ -14,9 +15,12 @@ import { Toaster } from "@/components/ui/sonner";
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      {/* Animations are reduced for people who ask for it in their system settings */}
+      <MotionConfig reducedMotion='user'>
+        <RouterProvider router={router} />
 
-      <Toaster richColors />
+        <Toaster richColors />
+      </MotionConfig>
     </ThemeProvider>
   </StrictMode>,
 )

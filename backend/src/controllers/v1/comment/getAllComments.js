@@ -14,8 +14,8 @@ const getAllComments = async (req, res) => {
 
     const comments = await Comment.find()
       .select('-__v')
-      .populate('userId', 'username avatar -__v')
-      .populate('blogId', 'title slug -__v')
+      .populate('userId', 'username firstName lastName avatar')
+      .populate('blogId', 'title slug banner.url banner.width banner.height')
       .sort({ createdAt: -1 })
       .skip(offset)
       .limit(limit)

@@ -28,7 +28,7 @@ export const Header = ({
   return (
     <header
       className={cn(
-        'glass fixed top-0 left-0 w-full h-16 grid items-center z-40',
+        'glass fixed top-0 left-0 w-full h-16 grid items-center z-40 border-x-0 border-t-0',
         className,
       )}
       {...props}
@@ -61,11 +61,8 @@ export const Header = ({
                     Login
                   </Link>
                 </Button>
-
-                <Button
-                  asChild
-                  style={{ backgroundColor: "rgb(124, 58, 237)" }}
-                >
+                    
+                <Button asChild>
                   <Link
                     to="/signup"
                     viewTransition
@@ -73,6 +70,7 @@ export const Header = ({
                     Get Started
                   </Link>
                 </Button>
+
               </div>
             </>
           )}

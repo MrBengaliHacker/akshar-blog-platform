@@ -29,7 +29,7 @@ const FOOTER_LINKS = {
 
 export const Footer = ({ className, ...props }: React.ComponentProps<'footer'>) => {
   return (
-    <footer className={cn('border-t glass', className)} {...props}>
+    <footer className={cn('glass border-x-0 border-b-0', className)} {...props}>
       <div className="container py-12 grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
           <Logo />
@@ -57,7 +57,7 @@ export const Footer = ({ className, ...props }: React.ComponentProps<'footer'>) 
 
         {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
           <div key={heading}>
-            <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+            <h3 className="text-sm font-semibold text-foreground">
               {heading}
             </h3>
             <ul className="mt-4 space-y-3">
@@ -66,7 +66,7 @@ export const Footer = ({ className, ...props }: React.ComponentProps<'footer'>) 
                   <Link
                     to={to}
                     viewTransition
-                    className="text-sm text-foreground/80 hover:text-primary transition-colors"
+                    className="text-sm text-muted-foreground hover:text-brand transition-colors"
                   >
                     {label}
                   </Link>

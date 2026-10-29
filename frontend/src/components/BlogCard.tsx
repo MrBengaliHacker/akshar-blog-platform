@@ -57,7 +57,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({
   return (
     <Card
       className={cn(
-        'relative group pt-2 h-full @container',
+        'relative group pt-2 h-full @container transition duration-300 hover:-translate-y-1 hover:shadow-glow hover:ring-primary/30 motion-reduce:transition-none motion-reduce:hover:translate-y-0',
         size === 'default' && 'flex flex-col-reverse justify-end',
         size === 'sm' && 'py-2 grid grid-cols-[1fr_1.15fr] gap-0 items-center',
         className,
@@ -133,7 +133,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({
               width={bannerWidth}
               height={bannerHeight}
               alt={title}
-              className='w-full h-full object-cover'
+              className='w-full h-full object-cover transition duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100'
             />
           </AspectRatio>
         </Link>
