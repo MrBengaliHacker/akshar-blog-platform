@@ -65,7 +65,7 @@ export const RecentBlogs = ({
           variants={listVariant}
         >
           {recentBlog.blogs.map(
-            ({ slug, banner, title, content, author, publishedAt }, index) => (
+            ({ slug, banner, title, content, author, category, publishedAt }, index) => (
               <motion.li
                 key={slug}
                 className={cn(index === 0 && 'lg:row-span-3')}
@@ -79,6 +79,7 @@ export const RecentBlogs = ({
                   content={content}
                   slug={slug}
                   authorId={author?._id}
+                  category={category}
                   authorName={author ? getUsername(author) : 'Deleted User'}
                   publishedAt={publishedAt}
                   size={index > 0 ? 'sm' : 'default'}

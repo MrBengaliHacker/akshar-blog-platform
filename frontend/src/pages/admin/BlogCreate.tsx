@@ -53,7 +53,7 @@ export const BlogCreate = () => {
       )}
     >
       <BlogForm
-        onSubmit={({ banner_image, title, content }, status) => {
+        onSubmit={({ banner_image, title, content, category }, status) => {
           if (!banner_image) {
             toast.error('Please add a cover image');
             return;
@@ -64,6 +64,7 @@ export const BlogCreate = () => {
           formData.append('banner_image', banner_image);
           formData.append('title', title);
           formData.append('content', content);
+          formData.append('category', category);
           formData.append('status', status);
 
           submittedStatus.current = status;

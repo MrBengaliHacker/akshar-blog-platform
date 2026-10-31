@@ -85,7 +85,7 @@ export const Profile = () => {
 
         {blogs.length > 0 && (
           <ul className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {blogs.map(({ slug, banner, title, publishedAt }) => (
+            {blogs.map(({ slug, banner, title, category, publishedAt }) => (
               <li key={slug}>
                 <BlogCard
                   bannerUrl={banner.url}
@@ -94,6 +94,7 @@ export const Profile = () => {
                   title={title}
                   slug={slug}
                   authorName={getUsername(user)}
+                  category={category}
                   publishedAt={publishedAt}
                 />
               </li>

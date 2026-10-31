@@ -6,12 +6,14 @@ import { toast } from 'sonner';
 
 // Custom Modules
 import { getUsername, getReadingTime } from '@/lib/utils';
+import { getCategoryName, useCategories } from '@/hooks/useCategories';
 import { aksharApi } from '@/api';
 
 // Components
 import { Page } from '@/components/Page';
 import Avatar from 'react-avatar';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import {
@@ -109,6 +111,9 @@ export const BlogDetail = () => {
     liked: boolean;
   };
 
+  const categories = useCategories();
+  const categoryName = getCategoryName(categories, blog.category);
+
   const [liked, setLiked] = useState(initialLiked);
   const [likesCount, setLikesCount] = useState(blog.likesCount);
   const [isLiking, setIsLiking] = useState(false);
@@ -194,6 +199,25 @@ export const BlogDetail = () => {
           <div className='text-muted-foreground'>
             {new Date(blog.publishedAt).toLocaleDateString('en-US', { dateStyle: 'medium' })}
           </div>
+
+          {categoryName && (
+            <>
+              <Separator orientation='vertical' className='data-vertical:h-1 data-vertical:w-1 rounded-full' />
+
+              <Link
+                to={`/blogs?category=${blog.category ?? 'general'}`}
+                viewTransition
+              >
+                <Badge
+                  variant='secondary'
+                  className='hover:bg-primary/15'
+                >
+                  {categoryName}
+                </Badge>
+              </Link>
+            </>
+          )}
+          
         </div>
 
         <Separator />

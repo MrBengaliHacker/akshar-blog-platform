@@ -19,6 +19,9 @@ export const BlogEdit = () => {
 
   const blog = loaderData.blog;
 
+  // Old blogs have no topic saved, they are General
+  const currentCategory = blog.category ?? 'general';
+
   const submittedStatus = useRef<Blog['status']>(blog.status);
   const data = fetcher.data as ActionResponse | undefined;
 
@@ -52,15 +55,17 @@ export const BlogEdit = () => {
           bannerUrl: blog.banner.url,
           title: blog.title,
           content: blog.content,
+          category: currentCategory,
           status: blog.status,
         }}
-        onSubmit={({ banner_image, title, content }, status) => {
+        onSubmit={({ banner_image, title, content, category }, status) => {
           const formData = new FormData();
 
           formData.append('blogId', blog._id);
           if (banner_image) formData.append('banner_image', banner_image);
           if (title !== blog.title) formData.append('title', title);
           if (content !== blog.content) formData.append('content', content);
+          if (category !== currentCategory) formData.append('category', category);
           if (status !== blog.status) formData.append('status', status);
 
           submittedStatus.current = status;

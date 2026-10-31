@@ -1,11 +1,22 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
+
+// Custom hooks
+import { useCategories } from '@/hooks/useCategories';
 
 // Components
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Tooltip,
   TooltipTrigger,
@@ -21,6 +32,7 @@ type BlogFormData = {
   banner_image?: Blob;
   title: string;
   content: string;
+  category: string;
 };
 
 type BlogStatus = 'draft' | 'published';
@@ -29,6 +41,7 @@ type FormDefaultValue = {
   bannerUrl: string;
   title: string;
   content: string;
+  category: string;
   status: BlogStatus;
 };
 
@@ -41,9 +54,12 @@ export const BlogForm: React.FC<BlogFormProps> = ({
   defaultValue,
   onSubmit,
 }) => {
+  const categories = useCategories();
+
   const [data, setData] = useState<BlogFormData>({
     title: defaultValue?.title || '',
     content: defaultValue?.content || '',
+    category: defaultValue?.category || '',
   });
 
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<
@@ -56,7 +72,34 @@ export const BlogForm: React.FC<BlogFormProps> = ({
     () => Boolean(bannerPreviewUrl),
     [bannerPreviewUrl],
   );
-  
+
+  const submit = (status: BlogStatus) => {
+    if (!bannerPreviewUrl) {
+      toast.error('Please add a cover image');
+      return;
+    }
+
+    if (!data.title.trim()) {
+      toast.error('Please add a title');
+      return;
+    }
+
+    if (!data.category) {
+      toast.error('Please choose a topic');
+      return;
+    }
+
+    onSubmit(
+      {
+        banner_image: data.banner_image,
+        title: data.title,
+        content: data.content,
+        category: data.category,
+      },
+      status,
+    );
+  };
+
   return (
     <div className="relative space-y-5">
       <div className="relative min-h-9 isolate">
@@ -140,6 +183,40 @@ export const BlogForm: React.FC<BlogFormProps> = ({
         </AnimatePresence>
       </div>
 
+      <div className="flex items-center gap-3">
+        <Label
+          htmlFor="category"
+          className="text-muted-foreground"
+        >
+          Topic
+        </Label>
+
+        <Select
+          value={data.category}
+          onValueChange={(value) =>
+            setData((prevData) => ({ ...prevData, category: value }))
+          }
+        >
+          <SelectTrigger
+            id="category"
+            className="w-52"
+          >
+            <SelectValue placeholder="Choose a topic" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {categories.map(({ slug, name }) => (
+              <SelectItem
+                key={slug}
+                value={slug}
+              >
+                {name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Textarea
         name="title"
         maxLength={180}
@@ -169,33 +246,13 @@ export const BlogForm: React.FC<BlogFormProps> = ({
       <div className="flex justify-end items-center gap-2 sticky bottom-0 py-4 bg-background isolate after:absolute after:bottom-full after:w-full after:h-10 after:bg-linear-to-t after:from-background after:to-transparent after:z-0 after:pointer-events-none">
         <Button
           variant="outline"
-          onClick={() =>
-            onSubmit(
-              {
-                banner_image: data.banner_image,
-                title: data.title,
-                content: data.content,
-              },
-              "draft"
-            )
-          }
+          onClick={() => submit('draft')}
         >
           Save as draft
         </Button>
 
-        <Button
-          onClick={() =>
-            onSubmit(
-              {
-                banner_image: data.banner_image,
-                title: data.title,
-                content: data.content,
-              },
-              "published"
-            )
-          }
-        >
-          {status === "draft" ? "Publish" : "Save changes"}
+        <Button onClick={() => submit('published')}>
+          {status === 'draft' ? 'Publish' : 'Save changes'}
         </Button>
       </div>
     </div>

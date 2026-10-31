@@ -43,8 +43,17 @@ export interface Blog {
 
   status: 'draft' | 'published';
 
+  // Old blogs have no topic saved, they count as General
+  category?: string;
+
   publishedAt: string;
   updatedAt: string;
+}
+
+export interface Category {
+  slug: string;
+  name: string;
+  count: number;
 }
 
 export interface Comment {

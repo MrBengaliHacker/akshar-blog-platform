@@ -66,7 +66,7 @@ export const AllBlogs = ({
           variants={listVariant}
         >
           {allBlog.blogs.map(
-            ({ slug, banner, title, content, author, publishedAt }) => (
+            ({ slug, banner, title, content, author, category, publishedAt }) => (
               <motion.li
                 key={slug}
                 variants={itemVariant}
@@ -79,6 +79,7 @@ export const AllBlogs = ({
                   content={content}
                   slug={slug}
                   authorId={author?._id}
+                  category={category}
                   authorName={author ? getUsername(author) : 'Deleted User'}
                   publishedAt={publishedAt}
                 />

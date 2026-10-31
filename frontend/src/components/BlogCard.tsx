@@ -6,11 +6,12 @@ import { formatDistanceToNowStrict } from 'date-fns';
 
 // Custom modules
 import { cn } from '@/lib/utils';
-
+import { getCategoryName, useCategories } from '@/hooks/useCategories';
 
 // Components
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './ui/card';
 import { AspectRatio } from './ui/aspect-ratio';
+import { Badge } from './ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 // Types
@@ -23,6 +24,7 @@ interface BlogCardProps extends React.ComponentProps<'div'> {
   slug: string;
   authorName: string;
   authorId?: string;
+  category?: string;
   publishedAt: string;
   size?: 'default' | 'sm';
 }
@@ -36,11 +38,14 @@ export const BlogCard: React.FC<BlogCardProps> = ({
   slug,
   authorName,
   authorId,
+  category,
   publishedAt,
   size = 'default',
   className,
   ...props
 }) => {
+  const categories = useCategories();
+  const categoryName = getCategoryName(categories, category);
   const plainText = useMemo(() => {
     if (!content) return '';
     const editor = new Editor({
@@ -101,6 +106,21 @@ export const BlogCard: React.FC<BlogCardProps> = ({
           </Tooltip>
         </div>
 
+        {size === 'default' && categoryName && (
+          <Link
+            to={`/blogs?category=${category ?? 'general'}`}
+            viewTransition
+            className='w-fit'
+          >
+            <Badge
+              variant='secondary'
+              className='hover:bg-primary/15'
+            >
+              {categoryName}
+            </Badge>
+          </Link>
+        )}
+                
         <Link
           to={`/blogs/${slug}`}
           viewTransition
