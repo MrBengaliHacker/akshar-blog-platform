@@ -9,6 +9,8 @@ const likeRoutes = require('./like');
 const commentRoutes = require('./comment');
 const aiRoutes = require('./ai');
 const categoryRoutes = require('./category');
+const statsRoutes = require('./stats');
+const writerRoutes = require('./writer');
 
 router.get('/', (req, res) => {
   res.status(200).json({
@@ -27,5 +29,7 @@ router.use('/likes', likeRoutes);
 router.use('/comments', commentRoutes);
 router.use('/ai', aiRoutes);
 router.use('/categories', categoryRoutes);
+router.use('/stats', statsRoutes);
+router.use('/writers', writerRoutes);
 
 module.exports = router;

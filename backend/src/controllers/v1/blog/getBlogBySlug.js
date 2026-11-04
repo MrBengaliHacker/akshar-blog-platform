@@ -12,7 +12,7 @@ const getBlogBySlug = async (req, res) => {
 
     const blog = await Blog.findOne({ slug })
       .select('-banner.publicId -__v')
-      .populate('author', '-password -createdAt -updatedAt -__v')
+      .populate('author', 'username firstName lastName avatar')
       .lean()
       .exec();
 

@@ -25,7 +25,7 @@ const getBlogsByUser = async (req, res) => {
 
     const blogs = await Blog.find(filter)
       .select('-banner.publicId -__v')
-      .populate('author', '-password -createdAt -updatedAt -__v')
+      .populate('author', 'username firstName lastName avatar')
       .limit(limit)
       .skip(offset)
       .sort({ publishedAt: -1 })

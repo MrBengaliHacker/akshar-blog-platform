@@ -32,14 +32,20 @@ const getAllBlogs = async (req, res) => {
       query.category = category;
     }
 
+    // ?sort=popular: the most read first (then the most liked), default: the newest first
+    const sortBy =
+      req.query.sort === 'popular'
+        ? { viewsCount: -1, likesCount: -1, publishedAt: -1 }
+        : { publishedAt: -1 };
+
     const total = await Blog.countDocuments(query);
 
     const blogs = await Blog.find(query)
       .select('-banner.publicId -__v')
-      .populate('author', '-password -createdAt -updatedAt -__v')
+      .populate('author', 'username firstName lastName avatar')
       .limit(limit)
       .skip(offset)
-      .sort({ publishedAt: -1 })
+      .sort(sortBy)
       .lean()
       .exec();
 

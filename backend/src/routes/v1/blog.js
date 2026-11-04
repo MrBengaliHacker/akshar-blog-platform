@@ -80,6 +80,10 @@ router.get(
     .optional()
     .isIn(CATEGORY_SLUGS)
     .withMessage('Invalid category'),
+  query('sort')
+    .optional()
+    .isIn(['latest', 'popular'])
+    .withMessage('Sort must be latest or popular'),
   validationError,
   getAllBlogs,
 )
