@@ -50,6 +50,17 @@ export interface Blog {
   updatedAt: string;
 }
 
+export interface Writer {
+  _id: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  avatar?: string;
+  bio?: string;
+  blogsCount: number;
+  viewsCount: number;
+}
+
 export interface Category {
   slug: string;
   name: string;

@@ -5,28 +5,40 @@ import { aksharApi } from '@/api';
 
 // Types
 import type { LoaderFunction } from 'react-router';
-import type { Blog, PaginatedResponse } from '@/types';
+import type { Blog, Category, PaginatedResponse, Writer } from '@/types';
 import { AxiosError } from 'axios';
 
 export interface HomeLoaderResponse {
-  recentBlog: PaginatedResponse<Blog, 'blogs'>;
-  allBlog: PaginatedResponse<Blog, 'blogs'>;
+  stats: { articles: number; writers: number; reads: number };
+  trending: PaginatedResponse<Blog, 'blogs'>;
+  latest: PaginatedResponse<Blog, 'blogs'>;
+  categories: Category[];
+  writers: Writer[];
 }
+
+// The extras (numbers, topics, writers) must not break the home page when they fail
+const optional = <T>(request: Promise<{ data: T }>, fallback: T) =>
+  request.then((response) => response.data).catch(() => fallback);
 
 const homeLoader: LoaderFunction = async () => {
   try {
-    const { data: recentBlog } = await aksharApi.get('/blogs', {
-      params: { limit: 4 },
-    });
+    const [trending, latest, stats, categories, writers] = await Promise.all([
+      aksharApi.get('/blogs', { params: { sort: 'popular', limit: 4 } }),
+      aksharApi.get('/blogs', { params: { limit: 6 } }),
+      optional(aksharApi.get('/stats'), { articles: 0, writers: 0, reads: 0 }),
+      optional(aksharApi.get('/categories'), { categories: [] as Category[] }),
+      optional(aksharApi.get('/writers', { params: { limit: 4 } }), {
+        writers: [] as Writer[],
+      }),
+    ]);
 
-    const { data: allBlog } = await aksharApi.get('/blogs', {
-      params: {
-        offset: 4,
-        limit: 12,
-      },
-    });
-
-    return { recentBlog, allBlog } as HomeLoaderResponse;
+    return {
+      stats,
+      trending: trending.data,
+      latest: latest.data,
+      categories: categories.categories,
+      writers: writers.writers,
+    } as HomeLoaderResponse;
   } catch (err) {
     if (err instanceof AxiosError) {
       throw data(err.response?.data?.message || err.message, {
